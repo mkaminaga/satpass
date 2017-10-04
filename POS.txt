@@ -1,0 +1,10 @@
+﻿# The WGS-84 model is applied.
+# Row 1 (+4n): The location name (string).
+# Row 2 (+4n): The location longitude (degree).
+# Row 3 (+4n): The location latitude (degree).
+# Row 4 (+4n): The height above sea level (m).
+
+TOKYO (JAPAN)
+139.69166666
+35.68944444
+45.0
