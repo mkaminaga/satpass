@@ -3,6 +3,7 @@
 #endif
 
 #define IDI_ICON1                               101
+#define IDC_CB_HTML                             40000
 #define IDC_CB_SPAN3                            40000
 #define IDC_EVENT                               40000
 #define IDC_ED_MIN1                             40001
@@ -25,7 +26,6 @@
 #define IDC_LB_MON2                             40009
 #define IDC_CB_TEXT                             40010
 #define IDC_LB_MON3                             40010
-#define IDC_CB_HTML                             40011
 #define IDC_LB_MON4                             40011
 #define IDC_GB1                                 40012
 #define IDC_LB_HR1                              40012
@@ -35,6 +35,7 @@
 #define IDC_LB_DATE3                            40014
 #define IDC_GB4                                 40015
 #define IDC_LB_DATE4                            40015
+#define IDC_CB_SPAN5                            40016
 #define IDC_GB5                                 40016
 #define IDC_LB_MON1                             40017
 #define IDC_LB_HR2                              40018
@@ -49,3 +50,9 @@
 #define IDC_ED_MIN3                             40027
 #define IDC_ED_MIN4                             40028
 #define IDC_CB_SPAN1                            40029
+#define IDC_LB_YR5                              40030
+#define IDC_LB_MON5                             40031
+#define IDC_LB_DATE5                            40032
+#define IDC_LB_HR5                              40033
+#define IDC_LB_MIN5                             40034
+#define IDC_ED_MIN5                             40035
