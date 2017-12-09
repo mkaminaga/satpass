@@ -23,40 +23,76 @@
   case (msg): return SetDlgMsgResult((hwnd), (msg), \
       HANDLE_##msg((hwnd), (wp), (lp), (fn)));
 
+  // The number of span of each event.
 #define SPAN_NUM      (4)
-#define RGB_NOTUSED   RGB(30, 30, 30)
-#define RGB_USED      RGB(255, 255, 255)
 
 namespace {
-struct EventSpan {
-  // ID for check boxes.
-  int cb_id_event_use;
-  int cb_id_all_span;
+struct ControlId {
   // ID for edit boxes.
-  int ed_id_year[SPAN_NUM];
-  int ed_id_mon[SPAN_NUM];
-  int ed_id_date[SPAN_NUM];
-  int ed_id_hour[SPAN_NUM];
-  int ed_id_min[SPAN_NUM];
+  int edit_year[SPAN_NUM];
+  int edit_mon[SPAN_NUM];
+  int edit_date[SPAN_NUM];
+  int edit_hour[SPAN_NUM];
+  int edit_min[SPAN_NUM];
+  int edit_len[SPAN_NUM];
   // ID for spins.
-  int ed_id_span[SPAN_NUM];
-  int sp_id_year[SPAN_NUM];
-  int sp_id_mon[SPAN_NUM];
-  int sp_id_date[SPAN_NUM];
-  int sp_id_min[SPAN_NUM];
-  int sp_id_span[SPAN_NUM];
-  int span[SPAN_NUM];
-  // miscellaneous.
-  int span_is_used[SPAN_NUM];
+  int spin_year[SPAN_NUM];
+  int spin_mon[SPAN_NUM];
+  int spin_date[SPAN_NUM];
+  int spin_hour[SPAN_NUM];
+  int spin_min[SPAN_NUM];
+  int spin_len[SPAN_NUM];
+  // ID for buttons.
+  int check_use_event;
+  int button_max_len;
+  int check_use_span[SPAN_NUM];
+  // Control ids in resource script is copied to these variables.
+  void Initialize() {
+    // ID for edit boxes.
+    edit_year[0] = IDC_ED_YR1; edit_year[1] = IDC_ED_YR2;
+    edit_year[2] = IDC_ED_YR3; edit_year[3] = IDC_ED_YR4;
+    edit_mon[0] = IDC_ED_MON1; edit_mon[1] = IDC_ED_MON2;
+    edit_mon[2] = IDC_ED_MON3; edit_mon[3] = IDC_ED_MON4;
+    edit_date[0] = IDC_ED_DATE1; edit_date[1] = IDC_ED_DATE2;
+    edit_date[2] = IDC_ED_DATE3; edit_date[3] = IDC_ED_DATE4;
+    edit_hour[0] = IDC_ED_HR1; edit_hour[1] = IDC_ED_HR2;
+    edit_hour[2] = IDC_ED_HR3; edit_hour[3] = IDC_ED_HR4;
+    edit_min[0] = IDC_ED_MIN1; edit_min[1] = IDC_ED_MIN2;
+    edit_min[2] = IDC_ED_MIN3; edit_min[3] = IDC_ED_MIN4;
+    edit_len[0] = IDC_ED_LEN1; edit_len[1] = IDC_ED_LEN2;
+    edit_len[2] = IDC_ED_LEN3; edit_len[3] = IDC_ED_LEN4;
+    // ID for spins.
+    spin_year[0] = IDC_SP_YR1; spin_year[1] = IDC_SP_YR2;
+    spin_year[2] = IDC_SP_YR3; spin_year[3] = IDC_SP_YR4;
+    spin_mon[0] = IDC_SP_MON1; spin_mon[1] = IDC_SP_MON2;
+    spin_mon[2] = IDC_SP_MON3; spin_mon[3] = IDC_SP_MON4;
+    spin_date[0] = IDC_SP_DATE1; spin_date[1] = IDC_SP_DATE2;
+    spin_date[2] = IDC_SP_DATE3; spin_date[3] = IDC_SP_DATE4;
+    spin_min[0] = IDC_SP_MIN1; spin_min[1] = IDC_SP_MIN2;
+    spin_min[2] = IDC_SP_MIN3; spin_min[3] = IDC_SP_MIN4;
+    spin_hour[0] = IDC_SP_HR1; spin_hour[1] = IDC_SP_HR2;
+    spin_hour[2] = IDC_SP_HR3; spin_hour[3] = IDC_SP_HR4;
+    spin_len[0] = IDC_SP_LEN1; spin_len[1] = IDC_SP_LEN2;
+    spin_len[2] = IDC_SP_LEN3; spin_len[3] = IDC_SP_LEN4;
+    // ID for buttons.
+    check_use_event = IDC_CB_SETEV;
+    button_max_len = IDC_ALLLEN;
+    check_use_span[0] = IDC_CB_EV1; check_use_span[1] = IDC_CB_EV2;
+    check_use_span[2] = IDC_CB_EV3; check_use_span[3] = IDC_CB_EV4;
+  }
+};
+struct EventData {
   sat::Calendar calendar[SPAN_NUM];
-  bool event_is_on;
-  bool span_is_all;
+  int len[SPAN_NUM];
+  int use_span[SPAN_NUM];  // Used as a flag.
+  int use_event;  // Used as a flag.
 };
   //
   // Variables.
   //
 Data* data = nullptr;
-std::vector<EventSpan> event_info;
+ControlId control_id;
+std::vector<EventData> event_data;
 
   //
   // Functions used in message crackers.
@@ -86,43 +122,76 @@ void ChangeEditBySpin(HWND hwnd, int idc_ed, NMUPDOWN* spin) {
     }
   }
 }
-void GetEventSpan(HWND hwnd, EventSpan* span) {
-  assert(span);
-  for (int i = 0; i < SPAN_NUM; ++i) {
-    // Edit values are get.
-    span->ed_id_year[i] = GetEditValue(hwnd, span->calendar[i].year);
-    span->ed_id_mon[i] = GetEditValue(hwnd, span->calendar[i].mon);
-    span->ed_id_date[i] = GetEditValue(hwnd, span->calendar[i].day);
-    span->ed_id_hour[i] = GetEditValue(hwnd, span->calendar[i].hour);
-    span->ed_id_min[i] = GetEditValue(hwnd, span->calendar[i].min);
-    span->ed_id_span[i] = GetEditValue(hwnd, span->span[i]);
+void GetEventSpan(HWND hwnd, EventData* event, int span_id) {
+  assert(event);
+  // Edit values are get.
+  event->calendar[span_id].year =
+    GetEditValue(hwnd, control_id.edit_year[span_id]);
+  event->calendar[span_id].mon =
+    GetEditValue(hwnd, control_id.edit_mon[span_id]);
+  event->calendar[span_id].day =
+    GetEditValue(hwnd, control_id.edit_date[span_id]);
+  event->calendar[span_id].hour =
+    GetEditValue(hwnd, control_id.edit_hour[span_id]);
+  event->calendar[span_id].min =
+    GetEditValue(hwnd, control_id.edit_min[span_id]);
+  event->len[span_id] =
+    GetEditValue(hwnd, control_id.edit_len[span_id]);
+  // Radio buttons are get.
+  if (Button_GetCheck(GetDlgItem(hwnd, control_id.check_use_span[span_id])) ==
+      BST_CHECKED) {
+    event->use_span[span_id] = TRUE;
+  } else {
+    event->use_span[span_id] = FALSE;
   }
 }
-void SetEventSpan(HWND hwnd, const EventSpan& span) {
-  for (int i = 0; i < SPAN_NUM; ++i) {
-    // Edit values are set.
-    SetEditValue(hwnd, span.ed_id_year[i], span.calendar[i].year);
-    SetEditValue(hwnd, span.ed_id_mon[i], span.calendar[i].mon);
-    SetEditValue(hwnd, span.ed_id_date[i], span.calendar[i].day);
-    SetEditValue(hwnd, span.ed_id_hour[i], span.calendar[i].hour);
-    SetEditValue(hwnd, span.ed_id_min[i], span.calendar[i].min);
-    SetEditValue(hwnd, span.ed_id_span[i], span.span[i]);
-    // Edit colors are set.
-    if (span.span_is_used[i] == 1) {
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_year[i]), TRUE);
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_mon[i]), TRUE);
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_date[i]), TRUE);
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_hour[i]), TRUE);
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_min[i]), TRUE);
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_span[i]), TRUE);
-    } else {
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_year[i]), FALSE);
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_mon[i]), FALSE);
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_date[i]), FALSE);
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_hour[i]), FALSE);
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_min[i]), FALSE);
-      Edit_Enable(GetDlgItem(hwnd, span.ed_id_span[i]), FALSE);
-    }
+void SetEventSpan(HWND hwnd, const EventData& event, int span_id) {
+  // Edit values are set.
+  SetEditValue(hwnd, control_id.edit_year[span_id],
+      event.calendar[span_id].year);
+  SetEditValue(hwnd, control_id.edit_mon[span_id],
+      event.calendar[span_id].mon);
+  SetEditValue(hwnd, control_id.edit_date[span_id],
+      event.calendar[span_id].day);
+  SetEditValue(hwnd, control_id.edit_hour[span_id],
+      event.calendar[span_id].hour);
+  SetEditValue(hwnd, control_id.edit_min[span_id],
+      event.calendar[span_id].min);
+  SetEditValue(hwnd, control_id.edit_len[span_id],
+      event.len[span_id]);
+  // Edit status are set.
+  Edit_Enable(GetDlgItem(hwnd, control_id.edit_year[span_id]),
+      event.use_span[span_id]);
+  Edit_Enable(GetDlgItem(hwnd, control_id.edit_mon[span_id]),
+      event.use_span[span_id]);
+  Edit_Enable(GetDlgItem(hwnd, control_id.edit_date[span_id]),
+      event.use_span[span_id]);
+  Edit_Enable(GetDlgItem(hwnd, control_id.edit_hour[span_id]),
+      event.use_span[span_id]);
+  Edit_Enable(GetDlgItem(hwnd, control_id.edit_min[span_id]),
+      event.use_span[span_id]);
+  Edit_Enable(GetDlgItem(hwnd, control_id.edit_len[span_id]),
+      event.use_span[span_id]);
+  // Spin status are set.
+  Edit_Enable(GetDlgItem(hwnd, control_id.spin_year[span_id]),
+      event.use_span[span_id]);
+  Edit_Enable(GetDlgItem(hwnd, control_id.spin_mon[span_id]),
+      event.use_span[span_id]);
+  Edit_Enable(GetDlgItem(hwnd, control_id.spin_date[span_id]),
+      event.use_span[span_id]);
+  Edit_Enable(GetDlgItem(hwnd, control_id.spin_hour[span_id]),
+      event.use_span[span_id]);
+  Edit_Enable(GetDlgItem(hwnd, control_id.spin_min[span_id]),
+      event.use_span[span_id]);
+  Edit_Enable(GetDlgItem(hwnd, control_id.spin_len[span_id]),
+      event.use_span[span_id]);
+  // Radio buttons are set.
+  if (event.use_span[span_id] == TRUE) {
+    Button_SetCheck(GetDlgItem(hwnd, control_id.check_use_span[span_id]),
+        BST_CHECKED);
+  } else {
+    Button_SetCheck(GetDlgItem(hwnd, control_id.check_use_span[span_id]),
+        BST_UNCHECKED);
   }
 }
 bool EditFile(const wchar_t* file_name) {
@@ -165,9 +234,30 @@ void OnClose(HWND hwnd) {
   EndDialog(hwnd, TRUE);
 }
 void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
+  HWND hwnd_tab = GetDlgItem(hwnd, IDC_TAB_EV);
+  int tab_index = TabCtrl_GetCurFocus(hwnd_tab);
+  switch (id) {
+    case IDC_CB_EV1:
+      GetEventSpan(hwnd, &event_data[tab_index], 0);
+      SetEventSpan(hwnd, event_data[tab_index], 0);
+      break;
+    case IDC_CB_EV2:
+      GetEventSpan(hwnd, &event_data[tab_index], 1);
+      SetEventSpan(hwnd, event_data[tab_index], 1);
+      break;
+    case IDC_CB_EV3:
+      GetEventSpan(hwnd, &event_data[tab_index], 2);
+      SetEventSpan(hwnd, event_data[tab_index], 2);
+      break;
+    case IDC_CB_EV4:
+      GetEventSpan(hwnd, &event_data[tab_index], 3);
+      SetEventSpan(hwnd, event_data[tab_index], 3);
+      break;
+    default:
+      break;
+  }
   // Warnings are prevented for non-used parameters.
   UNREFERENCED_PARAMETER(id);
-  UNREFERENCED_PARAMETER(hwnd);
   UNREFERENCED_PARAMETER(hwnd_ctrl);
   UNREFERENCED_PARAMETER(code_notify);
 }
@@ -200,10 +290,10 @@ void OnNotify(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     case IDC_SP_MIN3: ChangeEditBySpin(hwnd, IDC_ED_MIN3, nmupdown); break;
     case IDC_SP_MIN4: ChangeEditBySpin(hwnd, IDC_ED_MIN4, nmupdown); break;
     // Event span
-    case IDC_SP_SPAN1: ChangeEditBySpin(hwnd, IDC_ED_SPAN1, nmupdown); break;
-    case IDC_SP_SPAN2: ChangeEditBySpin(hwnd, IDC_ED_SPAN2, nmupdown); break;
-    case IDC_SP_SPAN3: ChangeEditBySpin(hwnd, IDC_ED_SPAN3, nmupdown); break;
-    case IDC_SP_SPAN4: ChangeEditBySpin(hwnd, IDC_ED_SPAN4, nmupdown); break;
+    case IDC_SP_LEN1: ChangeEditBySpin(hwnd, IDC_ED_LEN1, nmupdown); break;
+    case IDC_SP_LEN2: ChangeEditBySpin(hwnd, IDC_ED_LEN2, nmupdown); break;
+    case IDC_SP_LEN3: ChangeEditBySpin(hwnd, IDC_ED_LEN3, nmupdown); break;
+    case IDC_SP_LEN4: ChangeEditBySpin(hwnd, IDC_ED_LEN4, nmupdown); break;
     default:
       break;
   }
@@ -252,7 +342,7 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
   DisplayEvents(stdout, *data);
 
   // The calendar is initialized.
-  HWND hwnd_cal = GetDlgItem(hwnd, IDC_CAL_SPAN);
+  HWND hwnd_cal = GetDlgItem(hwnd, IDC_CAL_LEN);
   MonthCal_SetMaxSelCount(hwnd_cal, SATPASS_MAX_DAYS);
   MonthCal_SetMonthDelta(hwnd_cal, 1);
 
@@ -273,6 +363,22 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
       TRUE);
 
   // The event info is initialized according to today's date.
+  control_id.Initialize();
+  event_data.resize(data->events.size());
+  SYSTEMTIME today;
+  for (int i = 0; i < static_cast<int>(data->events.size()); ++i) {
+    for (int j = 0; j < SPAN_NUM; ++j) {
+      event_data[i].calendar[j].year = today.wYear;
+      event_data[i].calendar[j].mon = today.wMonth;
+      event_data[i].calendar[j].day = today.wDay;
+      event_data[i].calendar[j].hour = 0;
+      event_data[i].calendar[j].min = 0;
+      event_data[i].calendar[j].sec = 0;
+      event_data[i].len[j] = 0;
+      event_data[i].use_span[j] = FALSE;
+    }
+    event_data[i].use_event = FALSE;
+  }
 
   // Warnings are prevented for non-used parameters.
   UNREFERENCED_PARAMETER(hwnd_forcus);
