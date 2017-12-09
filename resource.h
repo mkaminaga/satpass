@@ -11,6 +11,7 @@
 #define IDC_EVENT                               40000
 #define IDC_ED_HR2                              40001
 #define IDC_ED_SPAN2                            40001
+#define IDC_POS                                 40001
 #define IDC_CB_ALLSPAN                          40002
 #define IDC_ED_HR3                              40002
 #define IDC_TAB_EV                              40002

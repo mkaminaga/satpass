@@ -30,6 +30,10 @@ Data* data = nullptr;
   //
   // Functions used in message crackers.
   //
+void Message(HWND hwnd, const wchar_t* message) {
+  assert(message);
+  MessageBox(hwnd, message, L"wsatpass", MB_OK);
+}
 int GetEditValue(HWND hwnd, int idc_ed) {
   wchar_t buf[16] = {0};
   GetDlgItemText(hwnd, idc_ed, buf, sizeof(buf));
@@ -50,6 +54,28 @@ void ChangeEditBySpin(HWND hwnd, int idc_ed, NMUPDOWN* spin) {
       SetEditValue(hwnd, idc_ed, value - 1);
     }
   }
+}
+bool EditFile(const wchar_t* file_name) {
+  assert(file_name);
+  wchar_t cmd[MAX_PATH + 8] = {0};
+  swprintf_s(cmd, sizeof(cmd), L"start %s", file_name);
+
+  // The file is edited.
+  int result = 0;
+  STARTUPINFO startup_info;
+  ZeroMemory(&startup_info, sizeof(startup_info));
+  startup_info.cb = sizeof(startup_info);
+  PROCESS_INFORMATION process_info;
+  ZeroMemory(&process_info, sizeof(process_info));
+  result = CreateProcess(nullptr, cmd, nullptr, nullptr, FALSE,
+      NORMAL_PRIORITY_CLASS, nullptr, nullptr, &startup_info,
+      &process_info);
+  CloseHandle(process_info.hThread);
+  WaitForSingleObject(process_info.hProcess, INFINITE);
+  CloseHandle(process_info.hProcess);
+
+  if (result == 0) return false;
+  return true;
 }
 
   //
@@ -88,8 +114,23 @@ void OnClose(HWND hwnd) {
 void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
   switch (id) {
     case IDC_TLE:
+      if (!EditFile(SATPASS_TLE_FILE)) {
+        Message(hwnd, L"Failed to open the TLE file");
+      }
+      break;
+    case IDC_POS:
+      if (!EditFile(SATPASS_POS_FILE)) {
+        Message(hwnd, L"Failed to open the POS file");
+      } else {
+        Message(hwnd, L"Restart to reflect changes on the position file");
+      }
       break;
     case IDC_EVENT:
+      if (!EditFile(SATPASS_EVENT_FILE)) {
+        Message(hwnd, L"Failed to open the EVENT file");
+      } else {
+        Message(hwnd, L"Restart to reflect changes on the event file");
+      }
       break;
     case IDC_START:
       break;

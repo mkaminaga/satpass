@@ -67,15 +67,15 @@ MAIN {
 #else // Console version for windows and ubuntu.
 
   // The TLE is read and displayed.
-  if (!ReadTLEData(L"TLE.txt", &data)) return -1;
+  if (!ReadTLEData(SATPASS_TLE_FILE, &data)) return -1;
   DisplayTLE(stdout, data);
 
   // Positions are read and displayed.
-  if (!ReadPositions(L"POS.txt", &data)) return -1;
+  if (!ReadPositions(SATPASS_POS_FILE, &data)) return -1;
   DisplayPositions(stdout, data);
 
   // The modes are read and read.
-  if (!ReadEvent(L"EVENT.txt", &data)) return -1;
+  if (!ReadEvent(SATPASS_EVENT_FILE, &data)) return -1;
   DisplayEvents(stdout, data);
 
   // The input is processed.

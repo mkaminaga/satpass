@@ -11,12 +11,14 @@
 #include <tle/v2.1.0/tle.h>
 #include <string>
 #include <vector>
-#define SATPASS_VERSION           L"satpass"
-#define SATPASS_COPYRIGHT         L"Copyright 2017 Mamoru Kaminaga"
 #define SATPASS_MAX_DAYS          (21)  // 3 weeks
 #define SATPASS_DELTA_SEC         (10)
 #define SATPASS_UT_TO_JST(n)      ((n) + 9.0 / 24.0)
 #define SATPASS_JST_TO_UT(n)      ((n) - 9.0 / 24.0)
+#define SATPASS_TLE_FILE          L"TLE.txt"
+#define SATPASS_POS_FILE          L"POS.txt"
+#define SATPASS_EVENT_FILE        L"EVENT.txt"
+
 enum TZ {
   TZ_UT = 0,
   TZ_JST,
