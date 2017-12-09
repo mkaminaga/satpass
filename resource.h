@@ -3,6 +3,8 @@
 #endif
 
 #define IDI_ICON1                               101
+#define IDD_MAINPANEL                           102
+#define IDD_EVENTSPAN                           103
 #define IDC_CB_EV4                              40000
 #define IDC_CB_HTML                             40000
 #define IDC_ED_HR1                              40000

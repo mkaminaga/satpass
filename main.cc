@@ -18,7 +18,7 @@
 #include "./win32gui.h"
 #include "./resource.h"
 
-#define MAIN int WINAPI WinMain(\
+#define MAIN int WINAPI wWinMain(\
     HINSTANCE hinstance, \
     HINSTANCE not_used, \
     LPTSTR cmdline, \
@@ -51,7 +51,7 @@ MAIN {
   // The dialog is opened.
   DialogBoxParam(
       hinstance,
-      MAKEINTRESOURCE(IDD_DIALOG1),
+      MAKEINTRESOURCE(IDD_MAINPANEL),
       nullptr,
       &DialogProc,
       reinterpret_cast<LPARAM>(&data));

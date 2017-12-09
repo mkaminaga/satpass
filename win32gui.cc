@@ -56,7 +56,7 @@ void ChangeEditBySpin(HWND hwnd, int idc_ed, NMUPDOWN* spin) {
   // Message crackers.
   //
 BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
-  assert(data);
+  assert(lp);
   data = reinterpret_cast<Data*>(lp);
 
   // The icon is loaded.
