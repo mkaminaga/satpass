@@ -51,7 +51,6 @@
 #define IDC_GB3                                 40014
 #define IDC_ED_YR2                              40015
 #define IDC_GB4                                 40015
-#define IDC_GB5                                 40016
 #define IDC_SP_YR1                              40016
 #define IDC_ED_YR3                              40017
 #define IDC_ED_YR4                              40018

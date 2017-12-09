@@ -8,6 +8,8 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
+#include <sat/v1.0.2/data.h>
+#include <vector>
 #include "./common.h"
 #include "./file.h"
 #include "./input.h"
@@ -78,9 +80,126 @@ bool EditFile(const wchar_t* file_name) {
   return true;
 }
 
-  //
-  // Message crackers.
-  //
+namespace event_dialog {
+BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
+  // Warnings are prevented for non-used parameters.
+  UNREFERENCED_PARAMETER(hwnd);
+  UNREFERENCED_PARAMETER(hwnd_forcus);
+  UNREFERENCED_PARAMETER(lp);
+  return TRUE;
+}
+void OnDestroy(HWND hwnd) {
+  // Warnings are prevented for non-used parameters.
+  UNREFERENCED_PARAMETER(hwnd);
+}
+void OnClose(HWND hwnd) {
+  // The modal dialog is ended.
+  EndDialog(hwnd, TRUE);
+}
+void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
+  // Warnings are prevented for non-used parameters.
+  UNREFERENCED_PARAMETER(id);
+  UNREFERENCED_PARAMETER(hwnd);
+  UNREFERENCED_PARAMETER(hwnd_ctrl);
+  UNREFERENCED_PARAMETER(code_notify);
+}
+void OnNotify(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
+  switch (wp) {
+    case IDC_SP_YR1:
+      ChangeEditBySpin(hwnd, IDC_ED_YR1, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_YR2:
+      ChangeEditBySpin(hwnd, IDC_ED_YR2, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_YR3:
+      ChangeEditBySpin(hwnd, IDC_ED_YR3, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_YR4:
+      ChangeEditBySpin(hwnd, IDC_ED_YR4, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_MON1:
+      ChangeEditBySpin(hwnd, IDC_ED_MON1, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_MON2:
+      ChangeEditBySpin(hwnd, IDC_ED_MON2, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_MON3:
+      ChangeEditBySpin(hwnd, IDC_ED_MON3, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_MON4:
+      ChangeEditBySpin(hwnd, IDC_ED_MON4, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_DATE1:
+      ChangeEditBySpin(hwnd, IDC_ED_DATE1, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_DATE2:
+      ChangeEditBySpin(hwnd, IDC_ED_DATE2, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_DATE3:
+      ChangeEditBySpin(hwnd, IDC_ED_DATE3, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_DATE4:
+      ChangeEditBySpin(hwnd, IDC_ED_DATE4, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_HR1:
+      ChangeEditBySpin(hwnd, IDC_ED_HR1, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_HR2:
+      ChangeEditBySpin(hwnd, IDC_ED_HR2, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_HR3:
+      ChangeEditBySpin(hwnd, IDC_ED_HR3, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_HR4:
+      ChangeEditBySpin(hwnd, IDC_ED_HR4, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_MIN1:
+      ChangeEditBySpin(hwnd, IDC_ED_MIN1, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_MIN2:
+      ChangeEditBySpin(hwnd, IDC_ED_MIN2, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_MIN3:
+      ChangeEditBySpin(hwnd, IDC_ED_MIN3, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_MIN4:
+      ChangeEditBySpin(hwnd, IDC_ED_MIN4, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_SPAN1:
+      ChangeEditBySpin(hwnd, IDC_ED_SPAN1, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_SPAN2:
+      ChangeEditBySpin(hwnd, IDC_ED_SPAN2, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_SPAN3:
+      ChangeEditBySpin(hwnd, IDC_ED_SPAN3, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    case IDC_SP_SPAN4:
+      ChangeEditBySpin(hwnd, IDC_ED_SPAN4, reinterpret_cast<NMUPDOWN*>(lp));
+      break;
+    default:
+      break;
+  }
+
+  // Warnings are prevented for non-used parameters.
+  UNREFERENCED_PARAMETER(msg);
+}
+INT_PTR CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
+  switch (msg) {
+    HANDLE_DLG_MSG(hwnd, WM_INITDIALOG, event_dialog::OnCreate);
+    HANDLE_DLG_MSG(hwnd, WM_DESTROY, event_dialog::OnDestroy);
+    HANDLE_DLG_MSG(hwnd, WM_COMMAND, event_dialog::OnCommand);
+    HANDLE_DLG_MSG(hwnd, WM_CLOSE, event_dialog::OnClose);
+    case WM_NOTIFY:
+      event_dialog::OnNotify(hwnd, msg, wp, lp);
+      return FALSE;
+    default:
+      return FALSE;
+  }
+}
+}  // event_dialog
+
+namespace main_dialog {
 BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
   assert(lp);
   data = reinterpret_cast<Data*>(lp);
@@ -110,6 +229,22 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
   MonthCal_SetMaxSelCount(hwnd_cal, SATPASS_MAX_DAYS);
   MonthCal_SetMonthDelta(hwnd_cal, 1);
 
+  // The tab control is initialized.
+  // The event dialog is pasted on the tab control.
+  HWND hwnd_tab = GetDlgItem(hwnd, IDC_TAB_EV);
+  TCITEM tcitem;
+  tcitem.mask = TCIF_TEXT;
+  for (int i = 0; i < static_cast<int>(data->events.size()); ++i) {
+    tcitem.pszText = (LPWSTR) data->events[i].c_str();
+    TabCtrl_InsertItem(hwnd_tab, i, &tcitem);
+  }
+  HWND hwnd_event = CreateDialog(hinstance, MAKEINTRESOURCE(IDD_EVENTSPAN),
+      hwnd_tab, event_dialog::DialogProc);
+  RECT rc;
+  GetWindowRect(hwnd_tab, &rc);
+  MoveWindow(hwnd_event, 0, 20, (rc.right - rc.left), (rc.bottom - rc.top),
+      TRUE);
+
   // Warnings are prevented for non-used parameters.
   UNREFERENCED_PARAMETER(hwnd_forcus);
   UNREFERENCED_PARAMETER(lp);
@@ -128,6 +263,8 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
     case IDC_TLE:
       if (!EditFile(SATPASS_TLE_FILE)) {
         Message(hwnd, L"Failed to open the TLE file");
+      } else {
+        Message(hwnd, L"Restart to reflect changes on the TLE file");
       }
       break;
     case IDC_POS:
@@ -145,6 +282,14 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
       }
       break;
     case IDC_START:
+      if (!Solve(data)) {
+        Message(hwnd, L"Failed to calculate orbit");
+        break;
+      }
+      DisplayPasses(stdout, *data);
+      if (!OutputFile(*data)) {
+        Message(hwnd, L"Failed to export file");
+      }
       break;
     default:
       // No implementation.
@@ -155,53 +300,16 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
   UNREFERENCED_PARAMETER(hwnd_ctrl);
   UNREFERENCED_PARAMETER(code_notify);
 }
-void OnNotify(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
-  switch (wp) {
-    case IDC_SP_YR1:
-      ChangeEditBySpin(hwnd, IDC_ED_YR1, reinterpret_cast<NMUPDOWN*>(lp));
-      break;
-    case IDC_SP_YR2:
-    case IDC_SP_YR3:
-    case IDC_SP_YR4:
-    case IDC_SP_MON1:
-    case IDC_SP_MON2:
-    case IDC_SP_MON3:
-    case IDC_SP_MON4:
-    case IDC_SP_DATE1:
-    case IDC_SP_DATE2:
-    case IDC_SP_DATE3:
-    case IDC_SP_DATE4:
-    case IDC_SP_HR1:
-    case IDC_SP_HR2:
-    case IDC_SP_HR3:
-    case IDC_SP_HR4:
-    case IDC_SP_MIN1:
-    case IDC_SP_MIN2:
-    case IDC_SP_MIN3:
-    case IDC_SP_MIN4:
-    case IDC_SP_SPAN1:
-    case IDC_SP_SPAN2:
-    case IDC_SP_SPAN3:
-    case IDC_SP_SPAN4:
-    default:
-      break;
-  }
-
-  // Warnings are prevented for non-used parameters.
-  UNREFERENCED_PARAMETER(msg);
-}
+}  // main_dialog
 }  // namespace
+
 INT_PTR CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
   switch (msg) {
-    HANDLE_DLG_MSG(hwnd, WM_INITDIALOG, OnCreate);
-    HANDLE_DLG_MSG(hwnd, WM_DESTROY, OnDestroy);
-    HANDLE_DLG_MSG(hwnd, WM_COMMAND, OnCommand);
-    HANDLE_DLG_MSG(hwnd, WM_CLOSE, OnClose);
-    case WM_NOTIFY:
-      OnNotify(hwnd, msg, wp, lp);
-      break;
+    HANDLE_DLG_MSG(hwnd, WM_INITDIALOG, main_dialog::OnCreate);
+    HANDLE_DLG_MSG(hwnd, WM_DESTROY, main_dialog::OnDestroy);
+    HANDLE_DLG_MSG(hwnd, WM_COMMAND, main_dialog::OnCommand);
+    HANDLE_DLG_MSG(hwnd, WM_CLOSE, main_dialog::OnClose);
     default:
       return FALSE;
   }
-  return FALSE;
 }
