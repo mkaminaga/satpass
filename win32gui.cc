@@ -36,6 +36,7 @@ struct EventSpan {
   int ed_id_year[SPAN_NUM];
   int ed_id_mon[SPAN_NUM];
   int ed_id_date[SPAN_NUM];
+  int ed_id_hour[SPAN_NUM];
   int ed_id_min[SPAN_NUM];
   // ID for spins.
   int ed_id_span[SPAN_NUM];
@@ -89,38 +90,38 @@ void GetEventSpan(HWND hwnd, EventSpan* span) {
   assert(span);
   for (int i = 0; i < SPAN_NUM; ++i) {
     // Edit values are get.
-    span[i].ed_id_year = GetEditValue(hwnd, span[i].calendar.year);
-    span[i].ed_id_mon = GetEditValue(hwnd, span[i].calendar.mon);
-    span[i].ed_id_day = GetEditValue(hwnd, span[i].calendar.day);
-    span[i].ed_id_hour = GetEditValue(hwnd, span[i].calendar.hour);
-    span[i].ed_id_min = GetEditValue(hwnd, span[i].calendar.min);
-    span[i].ed_id_span = GetEditValue(hwnd, span[i].span);
+    span->ed_id_year[i] = GetEditValue(hwnd, span->calendar[i].year);
+    span->ed_id_mon[i] = GetEditValue(hwnd, span->calendar[i].mon);
+    span->ed_id_date[i] = GetEditValue(hwnd, span->calendar[i].day);
+    span->ed_id_hour[i] = GetEditValue(hwnd, span->calendar[i].hour);
+    span->ed_id_min[i] = GetEditValue(hwnd, span->calendar[i].min);
+    span->ed_id_span[i] = GetEditValue(hwnd, span->span[i]);
   }
 }
 void SetEventSpan(HWND hwnd, const EventSpan& span) {
   for (int i = 0; i < SPAN_NUM; ++i) {
     // Edit values are set.
-    SetEditValue(hwnd, span[i].ed_id_year, span[i].calendar.year);
-    SetEditValue(hwnd, span[i].ed_id_mon, span[i].calendar.mon);
-    SetEditValue(hwnd, span[i].ed_id_day, span[i].calendar.day);
-    SetEditValue(hwnd, span[i].ed_id_hour, span[i].calendar.hour);
-    SetEditValue(hwnd, span[i].ed_id_min, span[i].calendar.min);
-    SetEditValue(hwnd, span[i].ed_id_span, span[i].span);
+    SetEditValue(hwnd, span.ed_id_year[i], span.calendar[i].year);
+    SetEditValue(hwnd, span.ed_id_mon[i], span.calendar[i].mon);
+    SetEditValue(hwnd, span.ed_id_date[i], span.calendar[i].day);
+    SetEditValue(hwnd, span.ed_id_hour[i], span.calendar[i].hour);
+    SetEditValue(hwnd, span.ed_id_min[i], span.calendar[i].min);
+    SetEditValue(hwnd, span.ed_id_span[i], span.span[i]);
     // Edit colors are set.
-    if (span[i].span_is_used == 1) {
-      SetBkColor(span[i].ed_id_year, RGB_USED);
-      SetBkColor(span[i].ed_id_mon, RGB_USED);
-      SetBkColor(span[i].ed_id_day, RGB_USED);
-      SetBkColor(span[i].ed_id_hour, RGB_USED);
-      SetBkColor(span[i].ed_id_min, RGB_USED);
-      SetBkColor(span[i].ed_id_span, RGB_USED);
+    if (span.span_is_used[i] == 1) {
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_year[i]), TRUE);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_mon[i]), TRUE);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_date[i]), TRUE);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_hour[i]), TRUE);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_min[i]), TRUE);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_span[i]), TRUE);
     } else {
-      SetBkColor(span[i].ed_id_year, RGB_NOTUSED);
-      SetBkColor(span[i].ed_id_mon, RGB_NOTUSED);
-      SetBkColor(span[i].ed_id_day, RGB_NOTUSED);
-      SetBkColor(span[i].ed_id_hour, RGB_NOTUSED);
-      SetBkColor(span[i].ed_id_min, RGB_NOTUSED);
-      SetBkColor(span[i].ed_id_span, RGB_NOTUSED);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_year[i]), FALSE);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_mon[i]), FALSE);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_date[i]), FALSE);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_hour[i]), FALSE);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_min[i]), FALSE);
+      Edit_Enable(GetDlgItem(hwnd, span.ed_id_span[i]), FALSE);
     }
   }
 }
@@ -171,37 +172,38 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
   UNREFERENCED_PARAMETER(code_notify);
 }
 void OnNotify(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
+  NMUPDOWN* nmupdown = reinterpret_cast<NMUPDOWN*>(lp);
   switch (wp) {
     // Event year
-    case IDC_SP_YR1: ChangeEditBySpin(hwnd, IDC_ED_YR1, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_YR2: ChangeEditBySpin(hwnd, IDC_ED_YR2, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_YR3: ChangeEditBySpin(hwnd, IDC_ED_YR3, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_YR4: ChangeEditBySpin(hwnd, IDC_ED_YR4, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
+    case IDC_SP_YR1: ChangeEditBySpin(hwnd, IDC_ED_YR1, nmupdown); break;
+    case IDC_SP_YR2: ChangeEditBySpin(hwnd, IDC_ED_YR2, nmupdown); break;
+    case IDC_SP_YR3: ChangeEditBySpin(hwnd, IDC_ED_YR3, nmupdown); break;
+    case IDC_SP_YR4: ChangeEditBySpin(hwnd, IDC_ED_YR4, nmupdown); break;
     // Event month
-    case IDC_SP_MON1: ChangeEditBySpin(hwnd, IDC_ED_MON1, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_MON2: ChangeEditBySpin(hwnd, IDC_ED_MON2, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_MON3: ChangeEditBySpin(hwnd, IDC_ED_MON3, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_MON4: ChangeEditBySpin(hwnd, IDC_ED_MON4, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
+    case IDC_SP_MON1: ChangeEditBySpin(hwnd, IDC_ED_MON1, nmupdown); break;
+    case IDC_SP_MON2: ChangeEditBySpin(hwnd, IDC_ED_MON2, nmupdown); break;
+    case IDC_SP_MON3: ChangeEditBySpin(hwnd, IDC_ED_MON3, nmupdown); break;
+    case IDC_SP_MON4: ChangeEditBySpin(hwnd, IDC_ED_MON4, nmupdown); break;
     // Event date
-    case IDC_SP_DATE1: ChangeEditBySpin(hwnd, IDC_ED_DATE1, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_DATE2: ChangeEditBySpin(hwnd, IDC_ED_DATE2, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_DATE3: ChangeEditBySpin(hwnd, IDC_ED_DATE3, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_DATE4: ChangeEditBySpin(hwnd, IDC_ED_DATE4, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
+    case IDC_SP_DATE1: ChangeEditBySpin(hwnd, IDC_ED_DATE1, nmupdown); break;
+    case IDC_SP_DATE2: ChangeEditBySpin(hwnd, IDC_ED_DATE2, nmupdown); break;
+    case IDC_SP_DATE3: ChangeEditBySpin(hwnd, IDC_ED_DATE3, nmupdown); break;
+    case IDC_SP_DATE4: ChangeEditBySpin(hwnd, IDC_ED_DATE4, nmupdown); break;
     // Event hour
-    case IDC_SP_HR1: ChangeEditBySpin(hwnd, IDC_ED_HR1, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_HR2: ChangeEditBySpin(hwnd, IDC_ED_HR2, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_HR3: ChangeEditBySpin(hwnd, IDC_ED_HR3, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_HR4: ChangeEditBySpin(hwnd, IDC_ED_HR4, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
+    case IDC_SP_HR1: ChangeEditBySpin(hwnd, IDC_ED_HR1, nmupdown); break;
+    case IDC_SP_HR2: ChangeEditBySpin(hwnd, IDC_ED_HR2, nmupdown); break;
+    case IDC_SP_HR3: ChangeEditBySpin(hwnd, IDC_ED_HR3, nmupdown); break;
+    case IDC_SP_HR4: ChangeEditBySpin(hwnd, IDC_ED_HR4, nmupdown); break;
     // Event minute
-    case IDC_SP_MIN1: ChangeEditBySpin(hwnd, IDC_ED_MIN1, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_MIN2: ChangeEditBySpin(hwnd, IDC_ED_MIN2, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_MIN3: ChangeEditBySpin(hwnd, IDC_ED_MIN3, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_MIN4: ChangeEditBySpin(hwnd, IDC_ED_MIN4, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
+    case IDC_SP_MIN1: ChangeEditBySpin(hwnd, IDC_ED_MIN1, nmupdown); break;
+    case IDC_SP_MIN2: ChangeEditBySpin(hwnd, IDC_ED_MIN2, nmupdown); break;
+    case IDC_SP_MIN3: ChangeEditBySpin(hwnd, IDC_ED_MIN3, nmupdown); break;
+    case IDC_SP_MIN4: ChangeEditBySpin(hwnd, IDC_ED_MIN4, nmupdown); break;
     // Event span
-    case IDC_SP_SPAN1: ChangeEditBySpin(hwnd, IDC_ED_SPAN1, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_SPAN2: ChangeEditBySpin(hwnd, IDC_ED_SPAN2, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_SPAN3: ChangeEditBySpin(hwnd, IDC_ED_SPAN3, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
-    case IDC_SP_SPAN4: ChangeEditBySpin(hwnd, IDC_ED_SPAN4, reinterpret_cast<NMUPDOWN*>(lp)); break;  // NOLINT
+    case IDC_SP_SPAN1: ChangeEditBySpin(hwnd, IDC_ED_SPAN1, nmupdown); break;
+    case IDC_SP_SPAN2: ChangeEditBySpin(hwnd, IDC_ED_SPAN2, nmupdown); break;
+    case IDC_SP_SPAN3: ChangeEditBySpin(hwnd, IDC_ED_SPAN3, nmupdown); break;
+    case IDC_SP_SPAN4: ChangeEditBySpin(hwnd, IDC_ED_SPAN4, nmupdown); break;
     default:
       break;
   }
