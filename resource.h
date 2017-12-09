@@ -54,7 +54,7 @@
 #define IDC_SP_SPAN2                            40031
 #define IDC_SP_SPAN3                            40032
 #define IDC_SP_SPAN4                            40033
-#define IDC_CB_EV_ALLSPAN                       40034
+#define IDC_ALLSPAN                             40034
 #define IDC_ED_HR2                              40035
 #define IDC_ED_HR3                              40036
 #define IDC_ED_HR4                              40037
