@@ -14,9 +14,9 @@
 #define IDC_CAL_SPAN                            40003
 #define IDC_CB_SETEV                            40003
 #define IDC_CB_EV4                              40004
-#define IDC_CB_UT                               40004
+#define IDC_CB_JST                              40004
 #define IDC_CB_EV1                              40005
-#define IDC_CB_JST                              40005
+#define IDC_CB_UT                               40005
 #define IDC_CB_EV2                              40006
 #define IDC_CB_TEXT                             40006
 #define IDC_CB_EV3                              40007
@@ -26,7 +26,6 @@
 #define IDC_ED_SPAN3                            40009
 #define IDC_EVENT                               40009
 #define IDC_ED_SPAN4                            40010
-#define IDC_GB2                                 40010
 #define IDC_CB_UT2                              40011
 #define IDC_SP_YR2                              40011
 #define IDC_CB_JST2                             40012
