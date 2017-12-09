@@ -93,6 +93,18 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
       ICON_BIG,
       (LPARAM) LoadIcon(hinstance, MAKEINTRESOURCE(IDI_ICON1)));
 
+  // The TLE is read and displayed.
+  if (!ReadTLEData(SATPASS_TLE_FILE, data)) return -1;
+  DisplayTLE(stdout, *data);
+
+  // Positions are read and displayed.
+  if (!ReadPositions(SATPASS_POS_FILE, data)) return -1;
+  DisplayPositions(stdout, *data);
+
+  // The modes are read and read.
+  if (!ReadEvent(SATPASS_EVENT_FILE, data)) return -1;
+  DisplayEvents(stdout, *data);
+
   // The calendar is initialized.
   HWND hwnd_cal = GetDlgItem(hwnd, IDC_CAL_SPAN);
   MonthCal_SetMaxSelCount(hwnd_cal, SATPASS_MAX_DAYS);
