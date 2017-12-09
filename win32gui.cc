@@ -23,11 +23,39 @@
   case (msg): return SetDlgMsgResult((hwnd), (msg), \
       HANDLE_##msg((hwnd), (wp), (lp), (fn)));
 
+#define SPAN_NUM      (4)
+#define RGB_NOTUSED   RGB(30, 30, 30)
+#define RGB_USED      RGB(255, 255, 255)
+
 namespace {
+struct EventSpan {
+  // ID for check boxes.
+  int cb_id_event_use;
+  int cb_id_all_span;
+  // ID for edit boxes.
+  int ed_id_year[SPAN_NUM];
+  int ed_id_mon[SPAN_NUM];
+  int ed_id_date[SPAN_NUM];
+  int ed_id_min[SPAN_NUM];
+  // ID for spins.
+  int ed_id_span[SPAN_NUM];
+  int sp_id_year[SPAN_NUM];
+  int sp_id_mon[SPAN_NUM];
+  int sp_id_date[SPAN_NUM];
+  int sp_id_min[SPAN_NUM];
+  int sp_id_span[SPAN_NUM];
+  int span[SPAN_NUM];
+  // miscellaneous.
+  int span_is_used[SPAN_NUM];
+  sat::Calendar calendar[SPAN_NUM];
+  bool event_is_on;
+  bool span_is_all;
+};
   //
   // Variables.
   //
 Data* data = nullptr;
+std::vector<EventSpan> event_info;
 
   //
   // Functions used in message crackers.
@@ -54,6 +82,45 @@ void ChangeEditBySpin(HWND hwnd, int idc_ed, NMUPDOWN* spin) {
       SetEditValue(hwnd, idc_ed, value + 1);
     } else if (spin->iDelta > 0) {
       SetEditValue(hwnd, idc_ed, value - 1);
+    }
+  }
+}
+void GetEventSpan(HWND hwnd, EventSpan* span) {
+  assert(span);
+  for (int i = 0; i < SPAN_NUM; ++i) {
+    // Edit values are get.
+    span[i].ed_id_year = GetEditValue(hwnd, span[i].calendar.year);
+    span[i].ed_id_mon = GetEditValue(hwnd, span[i].calendar.mon);
+    span[i].ed_id_day = GetEditValue(hwnd, span[i].calendar.day);
+    span[i].ed_id_hour = GetEditValue(hwnd, span[i].calendar.hour);
+    span[i].ed_id_min = GetEditValue(hwnd, span[i].calendar.min);
+    span[i].ed_id_span = GetEditValue(hwnd, span[i].span);
+  }
+}
+void SetEventSpan(HWND hwnd, const EventSpan& span) {
+  for (int i = 0; i < SPAN_NUM; ++i) {
+    // Edit values are set.
+    SetEditValue(hwnd, span[i].ed_id_year, span[i].calendar.year);
+    SetEditValue(hwnd, span[i].ed_id_mon, span[i].calendar.mon);
+    SetEditValue(hwnd, span[i].ed_id_day, span[i].calendar.day);
+    SetEditValue(hwnd, span[i].ed_id_hour, span[i].calendar.hour);
+    SetEditValue(hwnd, span[i].ed_id_min, span[i].calendar.min);
+    SetEditValue(hwnd, span[i].ed_id_span, span[i].span);
+    // Edit colors are set.
+    if (span[i].span_is_used == 1) {
+      SetBkColor(span[i].ed_id_year, RGB_USED);
+      SetBkColor(span[i].ed_id_mon, RGB_USED);
+      SetBkColor(span[i].ed_id_day, RGB_USED);
+      SetBkColor(span[i].ed_id_hour, RGB_USED);
+      SetBkColor(span[i].ed_id_min, RGB_USED);
+      SetBkColor(span[i].ed_id_span, RGB_USED);
+    } else {
+      SetBkColor(span[i].ed_id_year, RGB_NOTUSED);
+      SetBkColor(span[i].ed_id_mon, RGB_NOTUSED);
+      SetBkColor(span[i].ed_id_day, RGB_NOTUSED);
+      SetBkColor(span[i].ed_id_hour, RGB_NOTUSED);
+      SetBkColor(span[i].ed_id_min, RGB_NOTUSED);
+      SetBkColor(span[i].ed_id_span, RGB_NOTUSED);
     }
   }
 }
@@ -202,6 +269,8 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
   GetWindowRect(hwnd_tab, &rc);
   MoveWindow(hwnd_event, 0, 20, (rc.right - rc.left), (rc.bottom - rc.top),
       TRUE);
+
+  // The event info is initialized according to today's date.
 
   // Warnings are prevented for non-used parameters.
   UNREFERENCED_PARAMETER(hwnd_forcus);
