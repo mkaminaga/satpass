@@ -57,8 +57,8 @@ void ChangeEditBySpin(HWND hwnd, int idc_ed, NMUPDOWN* spin) {
 }
 bool EditFile(const wchar_t* file_name) {
   assert(file_name);
-  wchar_t cmd[MAX_PATH + 8] = {0};
-  swprintf_s(cmd, sizeof(cmd), L"start %s", file_name);
+  wchar_t cmd[MAX_PATH + 16] = {0};
+  swprintf_s(cmd, sizeof(cmd), L"notepad %s", file_name);
 
   // The file is edited.
   int result = 0;
