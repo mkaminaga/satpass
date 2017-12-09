@@ -97,42 +97,42 @@ void Message(HWND hwnd, const wchar_t* message) {
   assert(message);
   MessageBox(hwnd, message, L"wsatpass", MB_OK);
 }
-int GetEditValue(HWND hwnd, int idc_ed) {
+int GetEditValue(HWND hwnd, int edit_id) {
   wchar_t buf[16] = {0};
-  GetDlgItemText(hwnd, idc_ed, buf, sizeof(buf));
+  GetDlgItemText(hwnd, edit_id, buf, sizeof(buf));
   return _wtoi(buf);
 }
-void SetEditValue(HWND hwnd, int idc_ed, int value) {
+void SetEditValue(HWND hwnd, int edit_id, int value) {
   wchar_t buf[16] = {0};
   swprintf_s(buf, 10, L"%d", value);
-  SetDlgItemText(hwnd, idc_ed, buf);
+  SetDlgItemText(hwnd, edit_id, buf);
 }
-void ChangeEditBySpin(HWND hwnd, int idc_ed, NMUPDOWN* spin) {
+void ChangeEditBySpin(HWND hwnd, int edit_id, NMUPDOWN* spin) {
   assert(spin);
   if (spin->hdr.code == UDN_DELTAPOS) {
-    int value = GetEditValue(hwnd, idc_ed);
+    int value = GetEditValue(hwnd, edit_id);
     if (spin->iDelta < 0) {
-      SetEditValue(hwnd, idc_ed, value + 1);
+      SetEditValue(hwnd, edit_id, value + 1);
     } else if (spin->iDelta > 0) {
-      SetEditValue(hwnd, idc_ed, value - 1);
+      SetEditValue(hwnd, edit_id, value - 1);
     }
   }
 }
-void GetEventSpan(HWND hwnd, EventData* event, int span_id) {
+void GetEventSpan(HWND hwnd, EventData* event, int spin_id) {
   assert(event);
   // Edit values are get.
-  event->cal[span_id].year = GetEditValue(hwnd, control_id.edit_year[span_id]);
-  event->cal[span_id].mon = GetEditValue(hwnd, control_id.edit_mon[span_id]);
-  event->cal[span_id].day = GetEditValue(hwnd, control_id.edit_date[span_id]);
-  event->cal[span_id].hour = GetEditValue(hwnd, control_id.edit_hour[span_id]);
-  event->cal[span_id].min = GetEditValue(hwnd, control_id.edit_min[span_id]);
-  event->len[span_id] = GetEditValue(hwnd, control_id.edit_len[span_id]);
+  event->cal[spin_id].year = GetEditValue(hwnd, control_id.edit_year[spin_id]);
+  event->cal[spin_id].mon = GetEditValue(hwnd, control_id.edit_mon[spin_id]);
+  event->cal[spin_id].day = GetEditValue(hwnd, control_id.edit_date[spin_id]);
+  event->cal[spin_id].hour = GetEditValue(hwnd, control_id.edit_hour[spin_id]);
+  event->cal[spin_id].min = GetEditValue(hwnd, control_id.edit_min[spin_id]);
+  event->len[spin_id] = GetEditValue(hwnd, control_id.edit_len[spin_id]);
   // Radio buttons are get.
-  if (Button_GetCheck(GetDlgItem(hwnd, control_id.check_use_span[span_id])) ==
+  if (Button_GetCheck(GetDlgItem(hwnd, control_id.check_use_span[spin_id])) ==
       BST_CHECKED) {
-    event->use_span[span_id] = TRUE;
+    event->use_span[spin_id] = TRUE;
   } else {
-    event->use_span[span_id] = FALSE;
+    event->use_span[spin_id] = FALSE;
   }
 }
 void SetEventSpan(HWND hwnd, const EventData& event, int span_id) {
@@ -159,7 +159,6 @@ void SetEventSpan(HWND hwnd, const EventData& event, int span_id) {
   Spin_Enable(GetDlgItem(hwnd, control_id.spin_hour[span_id]), is_used);
   Spin_Enable(GetDlgItem(hwnd, control_id.spin_min[span_id]), is_used);
   Spin_Enable(GetDlgItem(hwnd, control_id.spin_len[span_id]), is_used);
-#endif
   // Buttons are set.
   if (event.use_span[span_id] == TRUE) {
     Button_SetCheck(GetDlgItem(hwnd, control_id.check_use_span[span_id]),
@@ -168,6 +167,20 @@ void SetEventSpan(HWND hwnd, const EventData& event, int span_id) {
     Button_SetCheck(GetDlgItem(hwnd, control_id.check_use_span[span_id]),
         BST_UNCHECKED);
   }
+#endif
+  // The spin controll is drawn.
+  InvalidateRect(GetDlgItem(hwnd, control_id.spin_year[span_id]), nullptr,
+      FALSE);
+  InvalidateRect(GetDlgItem(hwnd, control_id.spin_mon[span_id]), nullptr,
+      FALSE);
+  InvalidateRect(GetDlgItem(hwnd, control_id.spin_date[span_id]), nullptr,
+      FALSE);
+  InvalidateRect(GetDlgItem(hwnd, control_id.spin_hour[span_id]), nullptr,
+      FALSE);
+  InvalidateRect(GetDlgItem(hwnd, control_id.spin_min[span_id]), nullptr,
+      FALSE);
+  InvalidateRect(GetDlgItem(hwnd, control_id.spin_len[span_id]), nullptr,
+      FALSE);
 }
 bool EditFile(const wchar_t* file_name) {
   assert(file_name);
@@ -326,9 +339,10 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
   HWND hwnd_tab = GetDlgItem(hwnd, IDC_TAB_EV);
   TCITEM tcitem;
   tcitem.mask = TCIF_TEXT;
-  for (int i = 0; i < static_cast<int>(data->events.size()); ++i) {
-    tcitem.pszText = (LPWSTR) data->events[i].c_str();
-    TabCtrl_InsertItem(hwnd_tab, i, &tcitem);
+  for (int event_id = 0; event_id < static_cast<int>(data->events.size());
+      ++event_id) {
+    tcitem.pszText = (LPWSTR) data->events[event_id].c_str();
+    TabCtrl_InsertItem(hwnd_tab, event_id, &tcitem);
   }
   HWND hwnd_event = CreateDialog(hinstance, MAKEINTRESOURCE(IDD_EVENTSPAN),
       hwnd_tab, event_dialog::DialogProc);
@@ -351,21 +365,21 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
   event_data.resize(data->events.size());
   SYSTEMTIME today;
   ZeroMemory(&today, sizeof(today));
-  for (int i = 0; i < static_cast<int>(data->events.size()); ++i) {
-    for (int j = 0; j < SPAN_NUM; ++j) {
-      event_data[i].cal[j].year = today.wYear;
-      event_data[i].cal[j].mon = today.wMonth;
-      event_data[i].cal[j].day = today.wDay;
-      event_data[i].cal[j].hour = 0;
-      event_data[i].cal[j].min = 0;
-      event_data[i].cal[j].sec = 0;
-      event_data[i].len[j] = 0;
-      event_data[i].use_span[j] = FALSE;
+  for (int event_id = 0; event_id < static_cast<int>(data->events.size());
+      ++event_id) {
+    for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
+      event_data[event_id].cal[span_id].year = today.wYear;
+      event_data[event_id].cal[span_id].mon = today.wMonth;
+      event_data[event_id].cal[span_id].day = today.wDay;
+      event_data[event_id].cal[span_id].hour = 0;
+      event_data[event_id].cal[span_id].min = 0;
+      event_data[event_id].cal[span_id].sec = 0;
+      event_data[event_id].len[span_id] = 0;
+      event_data[event_id].use_span[span_id] = FALSE;
       // Changes are reflacted to controls.
-      GetEventSpan(hwnd, &event_data[i], j);
-      SetEventSpan(hwnd, event_data[i], j);
+      SetEventSpan(hwnd, event_data[event_id], span_id);
     }
-    event_data[i].use_event = FALSE;
+    event_data[event_id].use_event = FALSE;
   }
 
   // Warnings are prevented for non-used parameters.
