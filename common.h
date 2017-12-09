@@ -11,7 +11,7 @@
 #include <tle/v2.1.0/tle.h>
 #include <string>
 #include <vector>
-#define SATPASS_VERSION           L"satpass devel"
+#define SATPASS_VERSION           L"satpass"
 #define SATPASS_COPYRIGHT         L"Copyright 2017 Mamoru Kaminaga"
 #define SATPASS_MAX_DAYS          (21)  // 3 weeks
 #define SATPASS_DELTA_SEC         (10)
@@ -21,15 +21,15 @@ enum TZ {
   TZ_UT = 0,
   TZ_JST,
 };
-enum OUT {
-  OUT_TEXT,
-  OUT_HTML,
-  OUT_NONE,
+enum OUTTYPE {
+  OUTTYPE_TEXT = 0,
+  OUTTYPE_HTML,
+  OUTTYPE_NONE,
 };
 struct Data {
   TZ tz_in;  // The input time zone.
   TZ tz_out;  // The output time zone.
-  OUT out;  // The output format.
+  OUTTYPE out;  // The output format.
   double jd_start;  // The start Julian day in UT.
   double jd_stop;  // The stop Julian day in UT.
   sat::TLEDesc tle_desc;  // The TLE description data.

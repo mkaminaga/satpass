@@ -150,8 +150,8 @@ bool OutputFile(const Data& data) {
   // The output file.
   FILE* fp = nullptr;
   switch (data.out) {
-    case OUT_TEXT:
-#ifdef WIN32
+    case OUTTYPE_TEXT:
+#if defined(WIN32) || defined(WIN32GUI)
       _wfopen_s(&fp, L"pass_info.txt", L"w");
 #else
       fp = fopen("pass_info.txt", "w");
@@ -166,8 +166,8 @@ bool OutputFile(const Data& data) {
       fclose(fp);
       wprintf(L"The output pass_info.txt is created\n");
       break;
-    case OUT_HTML:
-#ifdef WIN32
+    case OUTTYPE_HTML:
+#if defined(WIN32) || defined(WIN32GUI)
       _wfopen_s(&fp, L"pass_info.html", L"w");
 #else
       fp = fopen("pass_info.html", "w");
