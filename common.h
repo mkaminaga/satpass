@@ -11,6 +11,7 @@
 #include <tle/v2.1.0/tle.h>
 #include <string>
 #include <vector>
+#define SATPASS_COPYRIGHT         L"Copyright 2017 Mamoru Kaminaga"
 #define SATPASS_MAX_DAYS          (21)  // 3 weeks
 #define SATPASS_DELTA_SEC         (10)
 #define SATPASS_UT_TO_JST(n)      ((n) + 9.0 / 24.0)
