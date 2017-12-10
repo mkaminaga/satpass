@@ -451,6 +451,26 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
       break;
     case IDC_START:
       {
+        // The data is cleared for coming simulation.
+        data->jd_event_from.clear();
+        data->jd_event_to.clear();
+        data->wo.clear();
+        data->jd.clear();
+        data->m.clear();
+        data->ps.clear();
+        data->vp.clear();
+        data->m_aos.clear();
+        data->m_los.clear();
+        data->jd_aos.clear();
+        data->jd_mel.clear();
+        data->jd_los.clear();
+        data->az_aos.clear();
+        data->az_mel.clear();
+        data->az_los.clear();
+        data->el_mel.clear();
+        data->duration.clear();
+        data->event.clear();
+
         // The input TZ is set.
         if (Button_GetCheck(GetDlgItem(hwnd, IDC_RB_JST)) == BST_CHECKED) {
           data->tz_in = TZ_JST;
@@ -509,12 +529,18 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
                 cal_stop.min, cal_stop.sec,
                 (data->tz_in == TZ_UT) ? L"UT" : L"JST");
 
+       // The current dialog values are acquired.
+       const int tab_num = TabCtrl_GetCurSel(handle.event_tab);
+       for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
+         GetEventDialog(handle.event_dialog, &event_data[tab_num], span_id);
+       }
+
         // For each event spans, start and stop times are set.
         double jd_event = 0.0;
         for (int event_id = 0; event_id < static_cast<int>(data->events.size());
             ++event_id) {
-          data->jd_event_from[event_id].clear();
-          data->jd_event_to[event_id].clear();
+          data->jd_event_from.push_back(std::vector<double>());
+          data->jd_event_to.push_back(std::vector<double>());
           for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
             if (event_data[event_id].use_span[span_id] == TRUE) {
               // The event start time is set.
