@@ -137,14 +137,12 @@ void GetEventDialog(HWND hwnd, EventData* event, int spin_id) {
 void SetEventDialog(HWND hwnd, const EventData& event, int span_id) {
   // Edit status are set.
   int is_used = event.use_span[span_id];
-#if 0
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_year[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_mon[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_date[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_hour[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_min[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_len[span_id]), is_used);
-#endif
 #if 0
   // Spin status are set.
   Spin_Enable(GetDlgItem(hwnd, control_id.spin_year[span_id]), is_used);
@@ -320,6 +318,7 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
 
   // Controls are initialized.
   InitCommonControls();
+  control_id.Initialize();
 
   // The TLE is read and displayed.
   if (!ReadTLEData(SATPASS_TLE_FILE, data)) return -1;
@@ -365,7 +364,6 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
   Button_SetCheck(GetDlgItem(hwnd, IDC_RB_TEXT), BST_CHECKED);
 
   // The event span data is initialized according to today's date.
-  control_id.Initialize();
   event_data.resize(data->events.size());
   SYSTEMTIME today;
   ZeroMemory(&today, sizeof(today));
@@ -380,8 +378,8 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
       event_data[event_id].cal[span_id].sec = 0;
       event_data[event_id].len[span_id] = 0;
       event_data[event_id].use_span[span_id] = FALSE;
-      // Changes are reflacted to controls.
-      SetEventDialog(hwnd, event_data[event_id], span_id);
+      // Changes are reflected to controls.
+      SetEventDialog(hwnd_event, event_data[event_id], span_id);
     }
     event_data[event_id].use_event = FALSE;
   }
