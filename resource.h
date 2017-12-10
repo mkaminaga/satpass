@@ -12,7 +12,6 @@
 #define IDC_ED_LEN1                             40002
 #define IDC_TAB_EV                              40002
 #define IDC_CAL_LEN                             40003
-#define IDC_CB_SETEV                            40003
 #define IDC_CB_EV4                              40004
 #define IDC_RB_UT                               40004
 #define IDC_CB_EV1                              40005

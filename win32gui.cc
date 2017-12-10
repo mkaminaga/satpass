@@ -1,4 +1,4 @@
-﻿  // @file win32gui.cc
+  // @file win32gui.cc
   // @brief GUI for win32 application.
   // @author Mamoru Kaminaga
   // @date 2017-12-09 14:53:30
@@ -77,17 +77,22 @@ struct ControlId {
     check_use_span[2] = IDC_CB_EV3; check_use_span[3] = IDC_CB_EV4;
   }
 };
-struct EventData {
-  sat::Calendar cal[SPAN_NUM];
-  int len[SPAN_NUM];
-  int use_span[SPAN_NUM];  // Used as a flag.
-  int use_event;  // Used as a flag.
+struct WindowHandle {
+  HWND htab_event;
+  HWND hdialog_event;
 };
+struct EventData {
+  int use_span[SPAN_NUM];  // Used as a flag.
+  int len[SPAN_NUM];
+  sat::Calendar cal[SPAN_NUM];
+};
+
   //
   // Variables.
   //
 Data* data = nullptr;
 ControlId control_id;
+WindowHandle handle;
 std::vector<EventData> event_data;
 
   //
@@ -143,15 +148,6 @@ void SetEventDialog(HWND hwnd, const EventData& event, int span_id) {
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_hour[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_min[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_len[span_id]), is_used);
-#if 0
-  // Spin status are set.
-  Spin_Enable(GetDlgItem(hwnd, control_id.spin_year[span_id]), is_used);
-  Spin_Enable(GetDlgItem(hwnd, control_id.spin_mon[span_id]), is_used);
-  Spin_Enable(GetDlgItem(hwnd, control_id.spin_date[span_id]), is_used);
-  Spin_Enable(GetDlgItem(hwnd, control_id.spin_hour[span_id]), is_used);
-  Spin_Enable(GetDlgItem(hwnd, control_id.spin_min[span_id]), is_used);
-  Spin_Enable(GetDlgItem(hwnd, control_id.spin_len[span_id]), is_used);
-#endif
   // Edit values are set.
   SetEditValue(hwnd, control_id.edit_year[span_id], event.cal[span_id].year);
   SetEditValue(hwnd, control_id.edit_mon[span_id], event.cal[span_id].mon);
@@ -167,19 +163,6 @@ void SetEventDialog(HWND hwnd, const EventData& event, int span_id) {
     Button_SetCheck(GetDlgItem(hwnd, control_id.check_use_span[span_id]),
         BST_UNCHECKED);
   }
-  // The WM_PAINT message is sent to spin controls.
-  InvalidateRect(GetDlgItem(hwnd, control_id.spin_year[span_id]), nullptr,
-      FALSE);
-  InvalidateRect(GetDlgItem(hwnd, control_id.spin_mon[span_id]), nullptr,
-      FALSE);
-  InvalidateRect(GetDlgItem(hwnd, control_id.spin_date[span_id]), nullptr,
-      FALSE);
-  InvalidateRect(GetDlgItem(hwnd, control_id.spin_hour[span_id]), nullptr,
-      FALSE);
-  InvalidateRect(GetDlgItem(hwnd, control_id.spin_min[span_id]), nullptr,
-      FALSE);
-  InvalidateRect(GetDlgItem(hwnd, control_id.spin_len[span_id]), nullptr,
-      FALSE);
 }
 bool EditFile(const wchar_t* file_name) {
   assert(file_name);
@@ -221,8 +204,7 @@ void OnClose(HWND hwnd) {
   EndDialog(hwnd, TRUE);
 }
 void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
-  HWND hwnd_tab = GetDlgItem(hwnd, IDC_TAB_EV);
-  int tab_index = TabCtrl_GetCurFocus(hwnd_tab);
+  int tab_index = TabCtrl_GetCurFocus(handle.htab_event);
   switch (id) {
     case IDC_CB_EV1:
       GetEventDialog(hwnd, &event_data[tab_index], 0);
@@ -241,6 +223,7 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
       SetEventDialog(hwnd, event_data[tab_index], 3);
       break;
     default:
+      // No implementation.
       break;
   }
   // Warnings are prevented for non-used parameters.
@@ -282,6 +265,7 @@ void OnNotify(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     case IDC_SP_LEN3: ChangeEditBySpin(hwnd, IDC_ED_LEN3, nmupdown); break;
     case IDC_SP_LEN4: ChangeEditBySpin(hwnd, IDC_ED_LEN4, nmupdown); break;
     default:
+      // No implementation.
       break;
   }
 
@@ -298,6 +282,7 @@ INT_PTR CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
       event_dialog::OnNotify(hwnd, msg, wp, lp);
       return FALSE;
     default:
+      // No implementation.
       return FALSE;
   }
 }
@@ -339,20 +324,20 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
 
   // The tab control is initialized.
   // The event dialog is pasted on the tab control.
-  HWND hwnd_tab = GetDlgItem(hwnd, IDC_TAB_EV);
+  handle.htab_event = GetDlgItem(hwnd, IDC_TAB_EV);
   TCITEM tcitem;
   tcitem.mask = TCIF_TEXT;
   for (int event_id = 0; event_id < static_cast<int>(data->events.size());
       ++event_id) {
     tcitem.pszText = (LPWSTR) data->events[event_id].c_str();
-    TabCtrl_InsertItem(hwnd_tab, event_id, &tcitem);
+    TabCtrl_InsertItem(handle.htab_event, event_id, &tcitem);
   }
-  HWND hwnd_event = CreateDialog(hinstance, MAKEINTRESOURCE(IDD_EVENTSPAN),
-      hwnd_tab, event_dialog::DialogProc);
+  handle.hdialog_event = CreateDialog(hinstance, MAKEINTRESOURCE(IDD_EVENTSPAN),
+      handle.htab_event, event_dialog::DialogProc);
   RECT rc;
-  GetWindowRect(hwnd_tab, &rc);
-  MoveWindow(hwnd_event, 0, 20, (rc.right - rc.left), (rc.bottom - rc.top),
-      TRUE);
+  GetWindowRect(handle.htab_event, &rc);
+  MoveWindow(handle.hdialog_event, 0, 20, (rc.right - rc.left),
+      (rc.bottom - rc.top), TRUE);
 
   // The initial input TZ check is set.
   Button_SetCheck(GetDlgItem(hwnd, IDC_RB_JST), BST_CHECKED);
@@ -366,7 +351,7 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
   // The event span data is initialized according to today's date.
   event_data.resize(data->events.size());
   SYSTEMTIME today;
-  ZeroMemory(&today, sizeof(today));
+  MonthCal_GetToday(GetDlgItem(hwnd, IDC_CAL_LEN), &today);
   for (int event_id = 0; event_id < static_cast<int>(data->events.size());
       ++event_id) {
     for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
@@ -379,9 +364,8 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
       event_data[event_id].len[span_id] = 0;
       event_data[event_id].use_span[span_id] = FALSE;
       // Changes are reflected to controls.
-      SetEventDialog(hwnd_event, event_data[event_id], span_id);
+      SetEventDialog(handle.hdialog_event, event_data[event_id], span_id);
     }
-    event_data[event_id].use_event = FALSE;
   }
 
   // Warnings are prevented for non-used parameters.
@@ -439,6 +423,32 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
   UNREFERENCED_PARAMETER(hwnd_ctrl);
   UNREFERENCED_PARAMETER(code_notify);
 }
+void OnNotify(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
+  assert(lp);
+  NMHDR* nmhdr = reinterpret_cast<NMHDR*>(lp);
+  int event_id = 0;
+  switch (nmhdr->code){
+    case TCN_SELCHANGING:
+      event_id = TabCtrl_GetCurSel(handle.htab_event);
+      for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
+        GetEventDialog(handle.hdialog_event, &event_data[event_id], span_id);
+      }
+      break;
+    case TCN_SELCHANGE:
+      event_id = TabCtrl_GetCurSel(handle.htab_event);
+      for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
+        SetEventDialog(handle.hdialog_event, event_data[event_id], span_id);
+      }
+      break;
+    default:
+      // No implementation.
+      break;
+  }
+  // Warnings are prevented for non-used parameters.
+  UNREFERENCED_PARAMETER(hwnd);
+  UNREFERENCED_PARAMETER(msg);
+  UNREFERENCED_PARAMETER(wp);
+}
 }  // main_dialog
 }  // namespace
 
@@ -448,7 +458,11 @@ INT_PTR CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     HANDLE_DLG_MSG(hwnd, WM_DESTROY, main_dialog::OnDestroy);
     HANDLE_DLG_MSG(hwnd, WM_COMMAND, main_dialog::OnCommand);
     HANDLE_DLG_MSG(hwnd, WM_CLOSE, main_dialog::OnClose);
+    case WM_NOTIFY:
+      main_dialog::OnNotify(hwnd, msg, wp, lp);
+      return FALSE;
     default:
+      // No implementation.
       return FALSE;
   }
 }
