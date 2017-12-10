@@ -27,13 +27,17 @@ bool Solve(Data* data) {
   // The orbital problem is solved and the ECEF position of the satellite is
   // derived for each jd.
   double days = data->jd_stop - data->jd_start;
-  data->jd.reserve(static_cast<size_t>(days * 86400 / SATPASS_DELTA_SEC));
-  data->m.reserve(static_cast<size_t>(days * 86400 / SATPASS_DELTA_SEC));
-  data->ps.reserve(static_cast<size_t>(days * 86400 / SATPASS_DELTA_SEC));
-  for (double jd = data->jd_start; jd <= data->jd_stop;
-       jd += SATPASS_DELTA_SEC / 86400.0) {
+  const size_t size = static_cast<size_t>(days * 86400 / SATPASS_DELTA_SEC);
+  wprintf(L"The time step: %d\n", size);
+  data->jd.reserve(size);
+  data->m.reserve(size);
+  data->ps.reserve(size);
+  double jd = 0;
+  for (int i = 0; i < static_cast<int>(size); ++i) {
+    jd = data->jd_start + (data->jd_stop - data->jd_start) *
+      i / static_cast<double>(size);
     if (!sat::GetSatPos(jd, &data->sat)) {
-      wprintf(L"The simulation failed at jd = %.8f.", jd);
+      wprintf(L"The simulation failed at jd = %.8f\n", jd);
       return false;
     }
     // The result is stored.
@@ -51,7 +55,7 @@ bool Solve(Data* data) {
     HCSSTATUS_IGNORE_FIRST_PASS,
   };
   HCSSTATUS status = HCSSTATUS_HIDDEN;
-  data->vp.reserve(static_cast<size_t>(days * 86400 / SATPASS_DELTA_SEC));
+  data->vp.reserve(size);
   wprintf(L"Calculating...Please wait.\n");
   fflush(0);
   for (int i = 0; i < static_cast<int>(data->nameo.size()); ++i) {

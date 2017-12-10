@@ -13,7 +13,7 @@
 #include <vector>
 #define SATPASS_COPYRIGHT         L"Copyright 2017 Mamoru Kaminaga"
 #define SATPASS_MAX_DAYS          (21)  // 3 weeks
-#define SATPASS_DELTA_SEC         (10)
+#define SATPASS_DELTA_SEC         (1)
 #define SATPASS_UT_TO_JST(n)      ((n) + 9.0 / 24.0)
 #define SATPASS_JST_TO_UT(n)      ((n) - 9.0 / 24.0)
 #define SATPASS_TLE_FILE          L"TLE.txt"
