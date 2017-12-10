@@ -450,15 +450,133 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
       }
       break;
     case IDC_START:
-      if (!Solve(data)) {
-        Message(hwnd, L"Failed to calculate orbit");
-        break;
-      }
-      DisplayPasses(stdout, *data);
-      if (!OutputFile(*data)) {
-        Message(hwnd, L"Failed to export file");
-      } else {
-        Message(hwnd, L"File is exported");
+      {
+        // The input TZ is set.
+        if (Button_GetCheck(GetDlgItem(hwnd, IDC_RB_JST)) == BST_CHECKED) {
+          data->tz_in = TZ_JST;
+        } else {
+          data->tz_in = TZ_UT;
+        }
+        wprintf(L"input time zone is set to %3ls\n",
+                (data->tz_in == TZ_UT) ? L"UT" : L"JST");
+
+        // The output TZ is set.
+        if (Button_GetCheck(GetDlgItem(hwnd, IDC_RB_JST2)) == BST_CHECKED) {
+          data->tz_out = TZ_JST;
+        } else {
+          data->tz_out = TZ_UT;
+        }
+        wprintf(L"output time zone is set to %3ls\n",
+                (data->tz_out == TZ_UT) ? L"UT" : L"JST");
+
+        // The start time is set.
+        HWND hwnd_cal = GetDlgItem(hwnd, IDC_CAL_LEN);
+        SYSTEMTIME range[2] = {0};
+        MonthCal_GetSelRange(hwnd_cal, range);
+        sat::Calendar cal_start;
+        cal_start.year = range[0].wYear;
+        cal_start.mon = range[0].wMonth;
+        cal_start.day = range[0].wDay;
+        cal_start.hour = cal_start.min = 0;
+        cal_start.sec = 0.0;
+        double jd_start = sat::ToJulianDay(cal_start);
+        if (data->tz_in == TZ_UT) {
+          data->jd_start = jd_start;
+        } else {
+          data->jd_start = SATPASS_JST_TO_UT(jd_start);
+        }
+        wprintf(L"start time is set to %.4d/%.2d/%.2d %.2d:%.2d:%.6lf %3ls\n",
+                cal_start.year, cal_start.mon, cal_start.day, cal_start.hour,
+                cal_start.min, cal_start.sec,
+                (data->tz_in == TZ_UT) ? L"UT" : L"JST");
+
+        // The stop time is set.
+        sat::Calendar cal_stop;
+        cal_stop.year = range[1].wYear;
+        cal_stop.mon = range[1].wMonth;
+        cal_stop.day = range[1].wDay;
+        cal_stop.hour = 23;
+        cal_stop.min = 59;
+        cal_stop.sec = 59.999;
+        double jd_stop = sat::ToJulianDay(cal_stop);
+        if (data->tz_in == TZ_UT) {
+          data->jd_stop = jd_stop;
+        } else {
+          data->jd_stop = SATPASS_JST_TO_UT(jd_stop);
+        }
+        wprintf(L"stop time is set to %.4d/%.2d/%.2d %.2d:%.2d:%.6lf %3ls\n",
+                cal_stop.year, cal_stop.mon, cal_stop.day, cal_stop.hour,
+                cal_stop.min, cal_stop.sec,
+                (data->tz_in == TZ_UT) ? L"UT" : L"JST");
+
+        // For each event spans, start and stop times are set.
+        double jd_event = 0.0;
+        for (int event_id = 0; event_id < static_cast<int>(data->events.size());
+            ++event_id) {
+          data->jd_event_from[event_id].clear();
+          data->jd_event_to[event_id].clear();
+          for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
+            if (event_data[event_id].use_span[span_id] == TRUE) {
+              // The event start time is set.
+              jd_event = sat::ToJulianDay(event_data[event_id].cal[span_id]);
+              if (data->tz_in == TZ_UT) {
+                data->jd_event_from[event_id].push_back(jd_event);
+              } else {
+                data->jd_event_from[event_id].push_back(
+                    SATPASS_JST_TO_UT(jd_event));
+              }
+              // The event stop time is set.
+              data->jd_event_to[event_id].push_back(
+                  data->jd_event_from[event_id].back() +
+                  event_data[event_id].len[span_id] / 1440.0);
+            }
+          }
+        }
+
+        // The output file type is set.
+        if (Button_GetCheck(GetDlgItem(hwnd, IDC_RB_TEXT)) == BST_CHECKED) {
+          data->out = OUTTYPE_TEXT;
+          wprintf(L"The text output file.\n");
+        } else {
+          data->out = OUTTYPE_HTML;
+          wprintf(L"The html output file.\n");
+        }
+
+        // The input is displayed.
+        wprintf(L"--------------------\n");
+        wprintf(L"epoch \n");
+
+        // epoch in JST.
+        sat::Calendar cal;
+        sat::ToCalendar(SATPASS_UT_TO_JST(data->jd_start), &cal);
+        wprintf(L"  start epoch %4d/%2d/%2d %2d:%2d:%.6f (JST)\n",
+            cal.year, cal.mon, cal.day, cal.hour, cal.min, cal.sec);
+        sat::ToCalendar(SATPASS_UT_TO_JST(data->jd_stop), &cal);
+        wprintf(L"  end   epoch %4d/%2d/%2d %2d:%2d:%.6f (JST)\n",
+            cal.year, cal.mon, cal.day, cal.hour, cal.min, cal.sec);
+
+        // epoch in UT.
+        sat::ToCalendar(data->jd_start, &cal);
+        wprintf(L"  start epoch %4d/%2d/%2d %2d:%2d:%.6f ( UT)\n",
+            cal.year, cal.mon, cal.day, cal.hour, cal.min, cal.sec);
+        sat::ToCalendar(data->jd_stop, &cal);
+        wprintf(L"  end   epoch %4d/%2d/%2d %2d:%2d:%.6f ( UT)\n",
+            cal.year, cal.mon, cal.day, cal.hour, cal.min, cal.sec);
+
+        // Event schedule.
+        DisplayDetailedEvents(stdout, *data);
+
+        // The simulation is run.
+        if (!Solve(data)) {
+          Message(hwnd, L"Failed to calculate orbit");
+          break;
+        }
+        DisplayPasses(stdout, *data);
+        if (!OutputFile(*data)) {
+          Message(hwnd, L"Failed to export file");
+        } else {
+          Message(hwnd, L"File is exported");
+        }
       }
       break;
     default:
