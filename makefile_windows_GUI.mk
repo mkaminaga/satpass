@@ -29,15 +29,15 @@ LIBS = "kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "comdlg32.lib"\
 "odbc32.lib" "odbccp32.lib" "comctl32.lib" "sat/v1.0.2/sat.lib" "tle/v2.1.0/tle.lib"
 
 # Debug build
-#CPPFLAGS = /nologo /W4 /Zi /O2 /MT /D"UNICODE" /D"_UNICODE" /D"DEBUG" /TP\
-#	/EHsc /Fd"$(OBJDIR)/" /D"NOMINMAX" /D"WIN32GUI"
-#LFLAGS = $(LIBS) /NOLOGO /SUBSYSTEM:WINDOWS /PDB:"$(PDB)" /MAP:"$(MAP)"\
-#	/DEBUG
+CPPFLAGS = /nologo /W4 /Zi /O2 /MT /D"UNICODE" /D"_UNICODE" /D"DEBUG" /TP\
+	/EHsc /Fd"$(OBJDIR)/" /D"NOMINMAX" /D"WIN32GUI"
+LFLAGS = $(LIBS) /NOLOGO /SUBSYSTEM:WINDOWS /PDB:"$(PDB)" /MAP:"$(MAP)"\
+	/DEBUG
 
 # Release build
-CPPFLAGS = /nologo /W4 /Zi /O2 /MT /D"UNICODE" /D"_UNICODE"\
-					 /EHsc /Fd"$(OBJDIR)/" /D"NOMINMAX" /D"WIN32GUI"
-LFLAGS = $(LIBS) /NOLOGO /SUBSYSTEM:WINDOWS /PDB:"$(PDB)" /MAP:"$(MAP)"
+#CPPFLAGS = /nologo /W4 /Zi /O2 /MT /D"UNICODE" /D"_UNICODE"\
+#					 /EHsc /Fd"$(OBJDIR)/" /D"NOMINMAX" /D"WIN32GUI"
+#LFLAGS = $(LIBS) /NOLOGO /SUBSYSTEM:WINDOWS /PDB:"$(PDB)" /MAP:"$(MAP)"
 
 ALL: $(TARGET)
 

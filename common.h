@@ -19,6 +19,8 @@
 #define SATPASS_TLE_FILE          L"TLE.txt"
 #define SATPASS_POS_FILE          L"POS.txt"
 #define SATPASS_EVENT_FILE        L"EVENT.txt"
+#define TRUE                      1
+#define FALSE                     0
 
 enum TZ {
   TZ_UT = 0,
@@ -38,6 +40,7 @@ struct Data {
   sat::TLEDesc tle_desc;  // The TLE description data
   sat::TLEData tle;  // The TLE data
   sat::SatData sat;  // The Satellite data
+  std::vector<int> use_event;
   std::vector<std::vector<double>> jd_event_from;  // The event span in jd
   std::vector<std::vector<double>> jd_event_to;  // The event span in jd
   std::vector<std::basic_string<wchar_t>> events;  // The event for the sat

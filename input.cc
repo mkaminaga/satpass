@@ -100,11 +100,14 @@ bool GetInput(Data* data) {
 #else
     wscanf(L"%d", &ans);
 #endif
+    data->use_event.resize(data->events.size());
     data->jd_event_from.resize(data->events.size());
     data->jd_event_to.resize(data->events.size());
     if (ans == 1) {
       data->event_is_set = true;
       for (int i = 0; i < static_cast<int>(data->events.size()); ++i) {
+        // The event is used.
+        data->use_event[i] = TRUE;
         // The span for the event is set.
         bool loop_out = false;
         for (int j = 0; !loop_out; ++j) {

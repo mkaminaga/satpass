@@ -66,31 +66,40 @@ void DisplayDetailedEvents(FILE* fp, const Data& data) {
   fwprintf(fp, L"event schedule\n");
   sat::Calendar cal_event_from;
   sat::Calendar cal_event_to;
-  if ((data.events.size() == 0) || (data.event_is_set == false)) {
+  int used_event_num = 0;
+  for (int i = 0; i < static_cast<int>(data.events.size()); ++i) {
+    if (data.use_event[i] == TRUE) {
+      ++used_event_num;
+    }
+  }
+  if ((data.events.size() == 0) || (data.event_is_set == false) ||
+      (used_event_num == 0)) {
     fwprintf(fp, L"Events are not specified or set.\n");
     fflush(0);
     return;
   }
   for (int i = 0; i < static_cast<int>(data.events.size()); ++i) {
-    fwprintf(fp, L"  %ls\n", data.events[i].c_str());
-    for (int j = 0; j < static_cast<int>(data.jd_event_from[i].size()); ++j) {
-      if (data.tz_out == TZ_UT) {
-        sat::ToCalendar(data.jd_event_from[i][j], &cal_event_from);
-        sat::ToCalendar(data.jd_event_to[i][j], &cal_event_to);
-      } else {
-        sat::ToCalendar(SATPASS_UT_TO_JST(data.jd_event_from[i][j]),
-                        &cal_event_from);
-        sat::ToCalendar(SATPASS_UT_TO_JST(data.jd_event_to[i][j]),
-                        &cal_event_to);
+    if (data.use_event[i] == TRUE) {
+      fwprintf(fp, L"  %ls\n", data.events[i].c_str());
+      for (int j = 0; j < static_cast<int>(data.jd_event_from[i].size()); ++j) {
+        if (data.tz_out == TZ_UT) {
+          sat::ToCalendar(data.jd_event_from[i][j], &cal_event_from);
+          sat::ToCalendar(data.jd_event_to[i][j], &cal_event_to);
+        } else {
+          sat::ToCalendar(SATPASS_UT_TO_JST(data.jd_event_from[i][j]),
+                          &cal_event_from);
+          sat::ToCalendar(SATPASS_UT_TO_JST(data.jd_event_to[i][j]),
+                          &cal_event_to);
+        }
+        fwprintf(fp, L"    %04d/%02d/%02d %02d:%02d:%02d - %04d/%02d/%02d %02d:%02d:%02d (%3s)\n",  // NOLINT
+                 cal_event_from.year, cal_event_from.mon, cal_event_from.day,
+                 cal_event_from.hour, cal_event_from.min,
+                 static_cast<int>(cal_event_from.sec + 0.5),
+                 cal_event_to.year, cal_event_to.mon, cal_event_to.day,
+                 cal_event_to.hour, cal_event_to.min,
+                 static_cast<int>(cal_event_to.sec + 0.5),
+                 (data.tz_out == TZ_UT) ? L"UT" : L"JST");
       }
-      fwprintf(fp, L"    %04d/%02d/%02d %02d:%02d:%02d - %04d/%02d/%02d %02d:%02d:%02d (%3s)\n",  // NOLINT
-               cal_event_from.year, cal_event_from.mon, cal_event_from.day,
-               cal_event_from.hour, cal_event_from.min,
-               static_cast<int>(cal_event_from.sec + 0.5),
-               cal_event_to.year, cal_event_to.mon, cal_event_to.day,
-               cal_event_to.hour, cal_event_to.min,
-               static_cast<int>(cal_event_to.sec + 0.5),
-               (data.tz_out == TZ_UT) ? L"UT" : L"JST");
     }
   }
   fflush(0);

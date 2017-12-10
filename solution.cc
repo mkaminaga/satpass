@@ -160,20 +160,22 @@ bool Solve(Data* data) {
     }
     // For each events.
     for (int e = 0; e < static_cast<int>(data->events.size()); ++e) {
-      // For each event spans.
-      for (int k = 0; k < static_cast<int>(data->jd_event_from[e].size());
-          ++k) {
-        // For each MEL jd of the position.
-        for (int j = 0; j < static_cast<int>(data->jd_mel[i].size()); ++j) {
-          // If the MEL is in the span of the event, add the event signature
-          // to the event raw of the output html file.
-          if ((data->jd_event_from[e][k] < data->jd_mel[i][j]) &&
-              (data->jd_mel[i][j] < data->jd_event_to[e][k])) {
-            if (data->event[i][j].length() != 0) {
-              data->event[i][j] += L", ";
-              data->event[i][j] += data->events[e];
-            } else {
-              data->event[i][j] = data->events[e];
+      if (data->use_event[e] == TRUE) {
+        // For each event spans.
+        for (int k = 0; k < static_cast<int>(data->jd_event_from[e].size());
+            ++k) {
+          // For each MEL jd of the position.
+          for (int j = 0; j < static_cast<int>(data->jd_mel[i].size()); ++j) {
+            // If the MEL is in the span of the event, add the event signature
+            // to the event raw of the output html file.
+            if ((data->jd_event_from[e][k] < data->jd_mel[i][j]) &&
+                (data->jd_mel[i][j] < data->jd_event_to[e][k])) {
+              if (data->event[i][j].length() != 0) {
+                data->event[i][j] += L", ";
+                data->event[i][j] += data->events[e];
+              } else {
+                data->event[i][j] = data->events[e];
+              }
             }
           }
         }

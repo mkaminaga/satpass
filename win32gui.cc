@@ -455,6 +455,7 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
     case IDC_START:
       {
         // The data is cleared for coming simulation.
+        data->use_event.clear();
         data->jd_event_from.clear();
         data->jd_event_to.clear();
         data->wo.clear();
@@ -541,6 +542,9 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
         // For each event spans, start and stop times are set.
         data->event_is_set  = true;
         double jd_event = 0.0;
+        data->use_event.resize(data->events.size());
+        data->jd_event_from.resize(data->events.size());
+        data->jd_event_to.resize(data->events.size());
         for (int event_id = 0; event_id < static_cast<int>(data->events.size());
             ++event_id) {
           // The used event time span is counted, skip if 0.
@@ -553,8 +557,7 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
           }
           if (check_cnt != 0) {
             // The event schedule is set.
-            data->jd_event_from.push_back(std::vector<double>());
-            data->jd_event_to.push_back(std::vector<double>());
+            data->use_event[event_id] = TRUE;
             for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
               if (event_data[event_id].use_span[span_id] == TRUE) {
                 // The event start time is set.
@@ -571,6 +574,9 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
                     event_data[event_id].len[span_id] / 1440.0);
               }
             }
+          } else {
+            // The event schedule is not set.
+            data->use_event[event_id] = FALSE;
           }
         }
 
