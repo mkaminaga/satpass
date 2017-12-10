@@ -9,6 +9,7 @@
 #include <windowsx.h>
 #include <commctrl.h>
 #include <sat/v1.0.2/data.h>
+#include <sat/v1.0.2/util.h>
 #include <vector>
 #include "./common.h"
 #include "./file.h"
@@ -78,8 +79,9 @@ struct ControlId {
   }
 };
 struct WindowHandle {
-  HWND htab_event;
-  HWND hdialog_event;
+  HWND event_tab;
+  HWND event_dialog;
+  HWND main_dialog;
 };
 struct EventData {
   int use_span[SPAN_NUM];  // Used as a flag.
@@ -204,7 +206,7 @@ void OnClose(HWND hwnd) {
   EndDialog(hwnd, TRUE);
 }
 void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
-  int tab_index = TabCtrl_GetCurFocus(handle.htab_event);
+  int tab_index = TabCtrl_GetCurFocus(handle.event_tab);
   switch (id) {
     case IDC_CB_EV1:
       GetEventDialog(hwnd, &event_data[tab_index], 0);
@@ -221,6 +223,48 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
     case IDC_CB_EV4:
       GetEventDialog(hwnd, &event_data[tab_index], 3);
       SetEventDialog(hwnd, event_data[tab_index], 3);
+      break;
+    case IDC_ALLLEN:
+      {
+        int event_id = TabCtrl_GetCurSel(handle.event_tab);
+        // The event span is reset.
+        SYSTEMTIME today;
+        HWND hwnd_cal = GetDlgItem(handle.main_dialog, IDC_CAL_LEN);
+        MonthCal_GetToday(hwnd_cal, &today);
+        for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
+          event_data[event_id].use_span[span_id] = FALSE;
+          event_data[event_id].len[span_id] = 0;
+          event_data[event_id].cal[span_id].year = today.wYear;
+          event_data[event_id].cal[span_id].mon = today.wMonth;
+          event_data[event_id].cal[span_id].day = today.wDay;
+        }
+        // The all span is set for span 1.
+        SYSTEMTIME range[2] = {0};
+        MonthCal_GetSelRange(hwnd_cal, range);
+        sat::Calendar cal_start;
+        cal_start.year = range[0].wYear;
+        cal_start.mon = range[0].wMonth;
+        cal_start.day = range[0].wDay;
+        cal_start.hour = cal_start.min = 0;
+        cal_start.sec = 0.0;
+        double start = sat::ToJulianDay(cal_start);
+        sat::Calendar cal_stop;
+        cal_stop.year = range[1].wYear;
+        cal_stop.mon = range[1].wMonth;
+        cal_stop.day = range[1].wDay;
+        cal_stop.hour = 23;
+        cal_stop.min = 59;
+        cal_stop.sec = 59.999;
+        double stop = sat::ToJulianDay(cal_stop);
+        // Data is set to span 1.
+        event_data[event_id].use_span[0] = TRUE;
+        event_data[event_id].cal[0] = cal_start;
+        event_data[event_id].len[0] = static_cast<int>((stop - start) * 1440);
+        // The data is reflected.
+        for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
+          SetEventDialog(handle.event_dialog, event_data[event_id], span_id);
+        }
+      }
       break;
     default:
       // No implementation.
@@ -304,6 +348,7 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
   // Controls are initialized.
   InitCommonControls();
   control_id.Initialize();
+  handle.main_dialog = hwnd;
 
   // The TLE is read and displayed.
   if (!ReadTLEData(SATPASS_TLE_FILE, data)) return -1;
@@ -324,19 +369,19 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
 
   // The tab control is initialized.
   // The event dialog is pasted on the tab control.
-  handle.htab_event = GetDlgItem(hwnd, IDC_TAB_EV);
+  handle.event_tab = GetDlgItem(hwnd, IDC_TAB_EV);
   TCITEM tcitem;
   tcitem.mask = TCIF_TEXT;
   for (int event_id = 0; event_id < static_cast<int>(data->events.size());
       ++event_id) {
     tcitem.pszText = (LPWSTR) data->events[event_id].c_str();
-    TabCtrl_InsertItem(handle.htab_event, event_id, &tcitem);
+    TabCtrl_InsertItem(handle.event_tab, event_id, &tcitem);
   }
-  handle.hdialog_event = CreateDialog(hinstance, MAKEINTRESOURCE(IDD_EVENTSPAN),
-      handle.htab_event, event_dialog::DialogProc);
+  handle.event_dialog = CreateDialog(hinstance, MAKEINTRESOURCE(IDD_EVENTSPAN),
+      handle.event_tab, event_dialog::DialogProc);
   RECT rc;
-  GetWindowRect(handle.htab_event, &rc);
-  MoveWindow(handle.hdialog_event, 0, 20, (rc.right - rc.left),
+  GetWindowRect(handle.event_tab, &rc);
+  MoveWindow(handle.event_dialog, 0, 20, (rc.right - rc.left),
       (rc.bottom - rc.top), TRUE);
 
   // The initial input TZ check is set.
@@ -364,7 +409,7 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
       event_data[event_id].len[span_id] = 0;
       event_data[event_id].use_span[span_id] = FALSE;
       // Changes are reflected to controls.
-      SetEventDialog(handle.hdialog_event, event_data[event_id], span_id);
+      SetEventDialog(handle.event_dialog, event_data[event_id], span_id);
     }
   }
 
@@ -412,6 +457,8 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
       DisplayPasses(stdout, *data);
       if (!OutputFile(*data)) {
         Message(hwnd, L"Failed to export file");
+      } else {
+        Message(hwnd, L"File is exported");
       }
       break;
     default:
@@ -429,15 +476,15 @@ void OnNotify(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
   int event_id = 0;
   switch (nmhdr->code){
     case TCN_SELCHANGING:
-      event_id = TabCtrl_GetCurSel(handle.htab_event);
+      event_id = TabCtrl_GetCurSel(handle.event_tab);
       for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
-        GetEventDialog(handle.hdialog_event, &event_data[event_id], span_id);
+        GetEventDialog(handle.event_dialog, &event_data[event_id], span_id);
       }
       break;
     case TCN_SELCHANGE:
-      event_id = TabCtrl_GetCurSel(handle.htab_event);
+      event_id = TabCtrl_GetCurSel(handle.event_tab);
       for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
-        SetEventDialog(handle.hdialog_event, event_data[event_id], span_id);
+        SetEventDialog(handle.event_dialog, event_data[event_id], span_id);
       }
       break;
     default:
