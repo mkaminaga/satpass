@@ -1,5 +1,5 @@
   // @file common.cc
-  // @brief The common data.
+  // @brief The common data
   // @author Mamoru Kaminaga
   // @date 2017-09-05 19:51:09
   // Copyright 2017 Mamoru Kaminaga
@@ -30,35 +30,35 @@ enum OUTTYPE {
   OUTTYPE_NONE,
 };
 struct Data {
-  TZ tz_in;  // The input time zone.
-  TZ tz_out;  // The output time zone.
-  OUTTYPE out;  // The output format.
-  double jd_start;  // The start Julian day in UT.
-  double jd_stop;  // The stop Julian day in UT.
-  sat::TLEDesc tle_desc;  // The TLE description data.
-  sat::TLEData tle;  // The TLE data.
-  sat::SatData sat;  // The Satellite data.
-  std::vector<std::vector<double>> jd_event_from;  // The event span in jd.
-  std::vector<std::vector<double>> jd_event_to;  // The event span in jd.
-  std::vector<std::basic_string<wchar_t>> events;  // The event for the satellite.
-  std::vector<std::basic_string<wchar_t>> nameo;  // Names of observation points.
-  std::vector<sat::WGS84Point> wo;  // Positions of the observer in the WGS-84.
-  std::vector<double> jd;  // Julian days.
-  std::vector<double> m;  // The mean anomaly (rad).
-  std::vector<sat::Point3> ps;  // Positions of the satellite in the ECEF.
-  std::vector<sat::WiewedPoint> vp;  // Positions of the satellite in WGS-84.
-  // The observed data for each observation position.
-  std::vector<std::vector<int>> m_aos;  // The mean anomaly of AOS (0-255).
-  std::vector<std::vector<int>> m_los;  // The mean anomaly of LOS (0-255).
-  std::vector<std::vector<double>> jd_aos;  // The Julian day of AOS.
-  std::vector<std::vector<double>> jd_mel;  // The Julian day of MEL.
-  std::vector<std::vector<double>> jd_los;  // The Julian day of LOS.
-  std::vector<std::vector<double>> az_aos;  // The azimuth of AOS (deg).
-  std::vector<std::vector<double>> az_mel;  // The azimuth of MEL (deg).
-  std::vector<std::vector<double>> az_los;  // The azimuth of LOS (deg).
-  std::vector<std::vector<double>> el_mel;  // The elevation of MEL (deg).
-  std::vector<std::vector<double>> duration;  // The duration of pass (min).
-  std::vector<std::vector<std::basic_string<wchar_t>>> event;  // The duration of pass (min).
-  bool event_is_set;  // The event data use flag.
+  TZ tz_in;  // The input time zone
+  TZ tz_out;  // The output time zone
+  OUTTYPE out;  // The output format
+  double jd_start;  // The start Julian day in UT
+  double jd_stop;  // The stop Julian day in UT
+  sat::TLEDesc tle_desc;  // The TLE description data
+  sat::TLEData tle;  // The TLE data
+  sat::SatData sat;  // The Satellite data
+  std::vector<std::vector<double>> jd_event_from;  // The event span in jd
+  std::vector<std::vector<double>> jd_event_to;  // The event span in jd
+  std::vector<std::basic_string<wchar_t>> events;  // The event for the sat
+  std::vector<std::basic_string<wchar_t>> nameo;  // Observation point names
+  std::vector<sat::WGS84Point> wo;  // Positions of the observer in the WGS-84
+  std::vector<double> jd;  // Julian days
+  std::vector<double> m;  // The mean anomaly (rad)
+  std::vector<sat::Point3> ps;  // Positions of the satellite in the ECEF
+  std::vector<sat::WiewedPoint> vp;  // Positions of the satellite in WGS-84
+  // The observed data for each observation position
+  std::vector<std::vector<int>> m_aos;  // The mean anomaly of AOS (0-255)
+  std::vector<std::vector<int>> m_los;  // The mean anomaly of LOS (0-255)
+  std::vector<std::vector<double>> jd_aos;  // The Julian day of AOS
+  std::vector<std::vector<double>> jd_mel;  // The Julian day of MEL
+  std::vector<std::vector<double>> jd_los;  // The Julian day of LOS
+  std::vector<std::vector<double>> az_aos;  // The azimuth of AOS (deg)
+  std::vector<std::vector<double>> az_mel;  // The azimuth of MEL (deg)
+  std::vector<std::vector<double>> az_los;  // The azimuth of LOS (deg)
+  std::vector<std::vector<double>> el_mel;  // The elevation of MEL (deg)
+  std::vector<std::vector<double>> duration;  // The duration of pass (min)
+  std::vector<std::vector<std::basic_string<wchar_t>>> event;  // Duration (min)
+  bool event_is_set;  // The event data use flag
 };
 #endif  // COMMON_H_

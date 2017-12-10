@@ -330,7 +330,7 @@ INT_PTR CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
       return FALSE;
   }
 }
-}  // event_dialog
+}  // namespace event_dialog
 
 namespace main_dialog {
 BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
@@ -592,7 +592,7 @@ void OnNotify(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
   assert(lp);
   NMHDR* nmhdr = reinterpret_cast<NMHDR*>(lp);
   int event_id = 0;
-  switch (nmhdr->code){
+  switch (nmhdr->code) {
     case TCN_SELCHANGING:
       event_id = TabCtrl_GetCurSel(handle.event_tab);
       for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
@@ -614,7 +614,7 @@ void OnNotify(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
   UNREFERENCED_PARAMETER(msg);
   UNREFERENCED_PARAMETER(wp);
 }
-}  // main_dialog
+}  // namespace main_dialog
 }  // namespace
 
 INT_PTR CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
