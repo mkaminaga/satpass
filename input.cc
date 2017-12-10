@@ -20,7 +20,7 @@ bool GetInput(Data* data) {
           TZ_JST, TZ_UT);
   wprintf(L">");
   fflush(0);
-#ifdef WIN32
+#if defined(WIN32)
   wscanf_s(L"%d", &data->tz_in);
 #else
   wscanf(L"%d", &data->tz_in);
@@ -34,7 +34,7 @@ bool GetInput(Data* data) {
           TZ_JST, TZ_UT);
   wprintf(L">");
   fflush(0);
-#ifdef WIN32
+#if defined(WIN32)
   wscanf_s(L"%d", &data->tz_out);
 #else
   wscanf(L"%d", &data->tz_out);
@@ -49,7 +49,7 @@ bool GetInput(Data* data) {
   wprintf(L">");
   fflush(0);
   sat::Calendar cal;
-#ifdef WIN32
+#if defined(WIN32)
   wscanf_s(L"%d %d %d %d %d %lf", &cal.year, &cal.mon, &cal.day, &cal.hour,
 #else
   wscanf(L"%d %d %d %d %d %lf", &cal.year, &cal.mon, &cal.day, &cal.hour,
@@ -70,7 +70,7 @@ bool GetInput(Data* data) {
   wprintf(L">");
   fflush(0);
   double days = 0.0;
-#ifdef WIN32
+#if defined(WIN32)
   wscanf_s(L"%lf", &days);
 #else
   wscanf(L"%lf", &days);
@@ -95,7 +95,7 @@ bool GetInput(Data* data) {
   } else {
     wprintf(L">");
     fflush(0);
-#ifdef WIN32
+#if defined(WIN32)
     wscanf_s(L"%d", &ans);
 #else
     wscanf(L"%d", &ans);
@@ -114,7 +114,7 @@ bool GetInput(Data* data) {
                   (data->tz_in == TZ_UT) ? L"UT" : L"JST");
           wprintf(L">");
           fflush(0);
-#ifdef WIN32
+#if defined(WIN32)
           wscanf_s(L"%d %d %d %d %d %lf", &cal.year, &cal.mon, &cal.day,
 #else
           wscanf(L"%d %d %d %d %d %lf", &cal.year, &cal.mon, &cal.day,
@@ -135,7 +135,7 @@ bool GetInput(Data* data) {
           wprintf(L">");
           fflush(0);
           double minutes = 0.0;
-#ifdef WIN32
+#if defined(WIN32)
           wscanf_s(L"%lf", &minutes);
 #else
           wscanf(L"%lf", &minutes);
@@ -153,7 +153,7 @@ bool GetInput(Data* data) {
                   data->events[i].c_str());
           wprintf(L">");
           fflush(0);
-#ifdef WIN32
+#if defined(WIN32)
           wscanf_s(L"%d", &ans);
 #else
           wscanf(L"%d", &ans);
@@ -171,22 +171,22 @@ bool GetInput(Data* data) {
   wprintf(L"Input 6 / 7, output file, text ('0'), html ('1') or none ('2'):\n");
   wprintf(L">");
   fflush(0);
-#ifdef WIN32
+#if defined(WIN32)
   wscanf_s(L"%d", &ans);
 #else
   wscanf(L"%d", &ans);
 #endif
   switch (ans) {
     case 0:
-      data->out = OUT_TEXT;
+      data->out = OUTTYPE_TEXT;
       wprintf(L"The text output file.\n");
       break;
     case 1:
-      data->out = OUT_HTML;
+      data->out = OUTTYPE_HTML;
       wprintf(L"The html output file.\n");
       break;
     default:
-      data->out = OUT_NONE;
+      data->out = OUTTYPE_NONE;
       wprintf(L"No output file.\n");
       break;
   }
@@ -218,7 +218,7 @@ bool GetInput(Data* data) {
   wprintf(L"Input 7 / 7, proceed? ('1' or '0'):\n");
   wprintf(L">");
   fflush(0);
-#ifdef WIN32
+#if defined(WIN32)
   wscanf_s(L"%d", &ans);
 #else
   wscanf(L"%d", &ans);

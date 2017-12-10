@@ -4,6 +4,7 @@
   // @date 2017-09-05 19:51:09
   // Copyright 2017 Mamoru Kaminaga
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <wchar.h>
 #include <sat/v1.0.2/data.h>
@@ -77,9 +78,9 @@ namespace {
     return true;
   }
   bool SkipBomAndGetLine(FILE* fp, wchar_t* buffer) {
-    wchar_t c = L'\0';
-    if (fread(&c, 3, 1, fp) == 0) return false;  // UTF-8 BOM '0xefbbbf'
-    if (c == static_cast<wchar_t>(0xbfbbef)) {
+    uint32_t c = 0;
+    if (fread(&c, 3, 1, fp) == 0) return false;  // UTF-8 BOM is EFBBBF.
+    if (c == 0x00bfbbef) {
       fseek(fp, 3, SEEK_SET);  // BOM is skipped.
     } else {
       fseek(fp, 0, SEEK_SET);  // There is no BOM.
@@ -91,8 +92,8 @@ bool ReadTLEData(const wchar_t* file_name, Data* data) {
   assert(file_name);
   assert(data);
   FILE* fp = nullptr;
-#ifdef WIN32
-  _fopen_s(&fp, file_name, "rb");
+#if defined(WIN32) || defined(WIN32GUI)
+  _wfopen_s(&fp, file_name, L"rb");
 #else
   char file_name_wcs[256] = {0};
   wcstombs(file_name_wcs, file_name, 256);
@@ -155,8 +156,8 @@ bool ReadPositions(const wchar_t* file_name, Data* data) {
   data->wo.clear();
   data->nameo.clear();
   FILE* fp = nullptr;
-#ifdef WIN32
-  _fopen_s(&fp, file_name, "rb");
+#if defined(WIN32) || defined(WIN32GUI)
+  _wfopen_s(&fp, file_name, L"rb");
 #else
   char file_name_wcs[256] = {0};
   wcstombs(file_name_wcs, file_name, 256);
@@ -185,7 +186,7 @@ bool ReadPositions(const wchar_t* file_name, Data* data) {
         s = POSREADINGSTATUS_LONGITUDE;
         break;
       case POSREADINGSTATUS_LONGITUDE:
-#ifdef WIN32
+#if defined(WIN32) || defined(WIN32GUI)
         swscanf_s(buffer, L"%lf", &wo.lambda);
 #else
         swscanf(buffer, L"%lf", &wo.lambda);
@@ -194,7 +195,7 @@ bool ReadPositions(const wchar_t* file_name, Data* data) {
         s = POSREADINGSTATUS_LATITUDE;
         break;
       case POSREADINGSTATUS_LATITUDE:
-#ifdef WIN32
+#if defined(WIN32) || defined(WIN32GUI)
         swscanf_s(buffer, L"%lf", &wo.phi);
 #else
         swscanf(buffer, L"%lf", &wo.phi);
@@ -203,7 +204,7 @@ bool ReadPositions(const wchar_t* file_name, Data* data) {
         s = POSREADINGSTATUS_HEIGHT;
         break;
       case POSREADINGSTATUS_HEIGHT:
-#ifdef WIN32
+#if defined(WIN32) || defined(WIN32GUI)
         swscanf_s(buffer, L"%lf", &wo.h);
 #else
         swscanf(buffer, L"%lf", &wo.h);
@@ -230,8 +231,8 @@ bool ReadEvent(const wchar_t* file_name, Data* data) {
   // The data is cleared.
   data->events.clear();
   FILE* fp = nullptr;
-#ifdef WIN32
-  _fopen_s(&fp, file_name, "rb");
+#if defined(WIN32) || defined(WIN32GUI)
+  _wfopen_s(&fp, file_name, L"rb");
 #else
   char file_name_wcs[256] = {0};
   wcstombs(file_name_wcs, file_name, 256);

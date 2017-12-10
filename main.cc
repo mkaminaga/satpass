@@ -9,22 +9,73 @@
 #include "./input.h"
 #include "./output.h"
 #include "./solution.h"
-#ifdef WIN32
-int wmain(int argc, char* argv[]) {
+
+#if defined(WIN32GUI)
+
+  // GUI version for windows.
+#include <windows.h>
+#include <commctrl.h>
+#include "./win32gui.h"
+#include "./resource.h"
+
+#define MAIN int WINAPI wWinMain(\
+    HINSTANCE hinstance, \
+    HINSTANCE not_used, \
+    LPTSTR cmdline, \
+    int cmdshow)
+
+#elif defined(WIN32)
+
+// Console version for windows.
+#define MAIN int wmain(int argc, char* argv[])
+
 #else
-int main(int argc, char* argv[]) {
+
+// Console version for ubuntu.
+#define MAIN int main(int argc, char* argv[])
+
 #endif
+
+MAIN {
   Data data;
+
+#if defined(WIN32GUI) // GUI version for windows.
+
+  // An console is allocated for stdio.
+  FILE* fp = nullptr;
+  AllocConsole();
+  _wfreopen_s(&fp, L"CONOUT$", L"w", stdout);
+  _wfreopen_s(&fp, L"CONOUT$", L"w", stderr);
+  _wfreopen_s(&fp, L"CONIN$", L"r", stdin);
+
+  // The dialog is opened.
+  DialogBoxParam(
+      hinstance,
+      MAKEINTRESOURCE(IDD_MAINPANEL),
+      nullptr,
+      &DialogProc,
+      reinterpret_cast<LPARAM>(&data));
+
+  // The console is released.
+  FreeConsole();
+
+  // Warnings are prevented for non-used parameters.
+  UNREFERENCED_PARAMETER(not_used);
+  UNREFERENCED_PARAMETER(cmdline);
+  UNREFERENCED_PARAMETER(cmdshow);
+
+#else // Console version for windows and ubuntu.
+
   // The TLE is read and displayed.
-  if (!ReadTLEData(L"TLE.txt", &data)) return -1;
+  if (!ReadTLEData(SATPASS_TLE_FILE, &data)) return -1;
   DisplayTLE(stdout, data);
 
   // Positions are read and displayed.
-  if (!ReadPositions(L"POS.txt", &data)) return -1;
+  if (!ReadPositions(SATPASS_POS_FILE, &data)) return -1;
   DisplayPositions(stdout, data);
 
   // The modes are read and read.
-  if (!ReadEvent(L"EVENT.txt", &data)) return -1;
+  if (!ReadEvent(SATPASS_EVENT_FILE, &data)) return -1;
   DisplayEvents(stdout, data);
 
   // The input is processed.
@@ -39,6 +90,7 @@ int main(int argc, char* argv[]) {
   // The output file.
   if (!OutputFile(data)) return -1;
 
-  fflush(0);
+#endif
+
   return 0;
 }
