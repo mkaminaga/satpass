@@ -107,18 +107,17 @@ void SetEditValue(HWND hwnd, int edit_id, int value) {
   swprintf_s(buf, 10, L"%d", value);
   SetDlgItemText(hwnd, edit_id, buf);
 }
-void ChangeEditBySpin(HWND hwnd, int edit_id, NMUPDOWN* spin) {
-  assert(spin);
-  if (spin->hdr.code == UDN_DELTAPOS) {
-    int value = GetEditValue(hwnd, edit_id);
-    if (spin->iDelta < 0) {
+void ChangeEditBySpin(HWND hwnd, int edit_id, const NMUPDOWN& spin) {
+  if (spin.hdr.code == UDN_DELTAPOS) {
+    const int value = GetEditValue(hwnd, edit_id);
+    if (spin.iDelta < 0) {
       SetEditValue(hwnd, edit_id, value + 1);
-    } else if (spin->iDelta > 0) {
+    } else if (spin.iDelta > 0) {
       SetEditValue(hwnd, edit_id, value - 1);
     }
   }
 }
-void GetEventSpan(HWND hwnd, EventData* event, int spin_id) {
+void GetEventDialog(HWND hwnd, EventData* event, int spin_id) {
   assert(event);
   // Edit values are get.
   event->cal[spin_id].year = GetEditValue(hwnd, control_id.edit_year[spin_id]);
@@ -135,22 +134,17 @@ void GetEventSpan(HWND hwnd, EventData* event, int spin_id) {
     event->use_span[spin_id] = FALSE;
   }
 }
-void SetEventSpan(HWND hwnd, const EventData& event, int span_id) {
-  // Edit values are set.
-  SetEditValue(hwnd, control_id.edit_year[span_id], event.cal[span_id].year);
-  SetEditValue(hwnd, control_id.edit_mon[span_id], event.cal[span_id].mon);
-  SetEditValue(hwnd, control_id.edit_date[span_id], event.cal[span_id].day);
-  SetEditValue(hwnd, control_id.edit_hour[span_id], event.cal[span_id].hour);
-  SetEditValue(hwnd, control_id.edit_min[span_id], event.cal[span_id].min);
-  SetEditValue(hwnd, control_id.edit_len[span_id], event.len[span_id]);
+void SetEventDialog(HWND hwnd, const EventData& event, int span_id) {
   // Edit status are set.
   int is_used = event.use_span[span_id];
+#if 0
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_year[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_mon[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_date[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_hour[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_min[span_id]), is_used);
   Edit_Enable(GetDlgItem(hwnd, control_id.edit_len[span_id]), is_used);
+#endif
 #if 0
   // Spin status are set.
   Spin_Enable(GetDlgItem(hwnd, control_id.spin_year[span_id]), is_used);
@@ -159,6 +153,14 @@ void SetEventSpan(HWND hwnd, const EventData& event, int span_id) {
   Spin_Enable(GetDlgItem(hwnd, control_id.spin_hour[span_id]), is_used);
   Spin_Enable(GetDlgItem(hwnd, control_id.spin_min[span_id]), is_used);
   Spin_Enable(GetDlgItem(hwnd, control_id.spin_len[span_id]), is_used);
+#endif
+  // Edit values are set.
+  SetEditValue(hwnd, control_id.edit_year[span_id], event.cal[span_id].year);
+  SetEditValue(hwnd, control_id.edit_mon[span_id], event.cal[span_id].mon);
+  SetEditValue(hwnd, control_id.edit_date[span_id], event.cal[span_id].day);
+  SetEditValue(hwnd, control_id.edit_hour[span_id], event.cal[span_id].hour);
+  SetEditValue(hwnd, control_id.edit_min[span_id], event.cal[span_id].min);
+  SetEditValue(hwnd, control_id.edit_len[span_id], event.len[span_id]);
   // Buttons are set.
   if (event.use_span[span_id] == TRUE) {
     Button_SetCheck(GetDlgItem(hwnd, control_id.check_use_span[span_id]),
@@ -167,8 +169,7 @@ void SetEventSpan(HWND hwnd, const EventData& event, int span_id) {
     Button_SetCheck(GetDlgItem(hwnd, control_id.check_use_span[span_id]),
         BST_UNCHECKED);
   }
-#endif
-  // The spin controll is drawn.
+  // The WM_PAINT message is sent to spin controls.
   InvalidateRect(GetDlgItem(hwnd, control_id.spin_year[span_id]), nullptr,
       FALSE);
   InvalidateRect(GetDlgItem(hwnd, control_id.spin_mon[span_id]), nullptr,
@@ -226,20 +227,20 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
   int tab_index = TabCtrl_GetCurFocus(hwnd_tab);
   switch (id) {
     case IDC_CB_EV1:
-      GetEventSpan(hwnd, &event_data[tab_index], 0);
-      SetEventSpan(hwnd, event_data[tab_index], 0);
+      GetEventDialog(hwnd, &event_data[tab_index], 0);
+      SetEventDialog(hwnd, event_data[tab_index], 0);
       break;
     case IDC_CB_EV2:
-      GetEventSpan(hwnd, &event_data[tab_index], 1);
-      SetEventSpan(hwnd, event_data[tab_index], 1);
+      GetEventDialog(hwnd, &event_data[tab_index], 1);
+      SetEventDialog(hwnd, event_data[tab_index], 1);
       break;
     case IDC_CB_EV3:
-      GetEventSpan(hwnd, &event_data[tab_index], 2);
-      SetEventSpan(hwnd, event_data[tab_index], 2);
+      GetEventDialog(hwnd, &event_data[tab_index], 2);
+      SetEventDialog(hwnd, event_data[tab_index], 2);
       break;
     case IDC_CB_EV4:
-      GetEventSpan(hwnd, &event_data[tab_index], 3);
-      SetEventSpan(hwnd, event_data[tab_index], 3);
+      GetEventDialog(hwnd, &event_data[tab_index], 3);
+      SetEventDialog(hwnd, event_data[tab_index], 3);
       break;
     default:
       break;
@@ -250,7 +251,7 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
   UNREFERENCED_PARAMETER(code_notify);
 }
 void OnNotify(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
-  NMUPDOWN* nmupdown = reinterpret_cast<NMUPDOWN*>(lp);
+  NMUPDOWN nmupdown = *reinterpret_cast<NMUPDOWN*>(lp);
   switch (wp) {
     // Event year
     case IDC_SP_YR1: ChangeEditBySpin(hwnd, IDC_ED_YR1, nmupdown); break;
@@ -317,6 +318,9 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
       ICON_BIG,
       (LPARAM) LoadIcon(hinstance, MAKEINTRESOURCE(IDI_ICON1)));
 
+  // Controls are initialized.
+  InitCommonControls();
+
   // The TLE is read and displayed.
   if (!ReadTLEData(SATPASS_TLE_FILE, data)) return -1;
   DisplayTLE(stdout, *data);
@@ -377,7 +381,7 @@ BOOL OnCreate(HWND hwnd, HWND hwnd_forcus, LPARAM lp) {
       event_data[event_id].len[span_id] = 0;
       event_data[event_id].use_span[span_id] = FALSE;
       // Changes are reflacted to controls.
-      SetEventSpan(hwnd, event_data[event_id], span_id);
+      SetEventDialog(hwnd, event_data[event_id], span_id);
     }
     event_data[event_id].use_event = FALSE;
   }
