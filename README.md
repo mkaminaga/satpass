@@ -2,6 +2,12 @@
 ====
 衛星の軌道を解析し、世界各地での衛星の可視時間を計算する。<br>
 
+ * wsatpass.exe : Windows GUI版
+ * satpass.exe : Windows コンソール版
+ * satpass.out : Ubuntu コンソール版
+
+![capture](doc/capture.png)<br>
+
 出力例：<br>
 HTMLファイル[pass\_info.html](doc/pass_info.html)<br>
 TEXTファイル[pass\_info.txt](doc/pass_info.txt)<br>
@@ -9,6 +15,7 @@ TEXTファイル[pass\_info.txt](doc/pass_info.txt)<br>
 使い方
 ----
 satpassの操作手順を記載する<br>
+wsatpassの使い方は、これをGUIに置き換えること<br>
 
 [TLE.txt](TLE.txt)の更新<br>
 ------
@@ -129,8 +136,10 @@ satpassの操作手順を記載する<br>
 
 注意点
 ----
-入力中に方向キーを押すと、入力を正常に読み取れなくなってしまう。<br>
-入力の誤りを直す際は、方向キーではなくバックスペースキーでカーソルを移動させること。<br>
+ * GUI版であるwsatpassには、一つのイベントにつき期間を4つまでしか設定できない制約がある<br>
+   一つのイベントに4つ以上の期間を割り当てたい場合には、同じ名前のイベントを`EVENT.txt`に複数登録すること<br>
+ * コンソール版で入力中に方向キーを押すと、入力を正常に読み取れなくなってしまう。<br>
+   方向キーではなくバックスペースキーでカーソルを移動させること。<br>
 
 動作環境
 ----
