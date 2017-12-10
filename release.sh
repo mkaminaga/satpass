@@ -5,12 +5,12 @@
 # Copyright 2017 Mamoru Kaminaga
 
 if [ "$1" = "" ]; then
-  echo 'need args, 1->gcc, 2->cl'
+  echo 'need args, 1->ubuntu, 2->windows'
   exit 1
 fi
 
 # Required: The latest version.
-VERSION='v1.1.1'
+VERSION='v2.0.0'
 
 # Output directory is created
 OUTDIR="release"
@@ -25,9 +25,14 @@ if [ "$1" = "1" ]; then
   # Output sub directory is created
   TARGET="${OUTDIR}/release_${VERSION}_ubuntu"
 elif [ "$1" = "2" ]; then
-  # Build test for Windows.
+  # Build test for Windows (Console).
   touch *.cc
   nmake /f makefile_windows.mk | iconv -f cp932 -t utf-8
+  if [ $? != 0 ]; then exit 1; fi
+
+  # Build test for Windows (GUI).
+  touch *.cc
+  nmake /f makefile_windows_GUI.mk | iconv -f cp932 -t utf-8
   if [ $? != 0 ]; then exit 1; fi
 
   # Output sub directory is created

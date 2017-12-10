@@ -6,9 +6,13 @@
 #ifndef WIN32GUI_H_
 #define WIN32GUI_H_
 
+# if defined(WIN32GUI)
+
 #include <wchar.h>
 #include <windows.h>
 
 INT_PTR CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+
+# endif
 
 #endif  // WIN32GUI_H_

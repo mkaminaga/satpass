@@ -3,6 +3,9 @@
   // @author Mamoru Kaminaga
   // @date 2017-12-09 14:53:30
   // Copyright 2017 Mamoru Kaminaga
+
+#if defined(WIN32GUI)
+
 #include <assert.h>
 #include <wchar.h>
 #include <windows.h>
@@ -529,32 +532,44 @@ void OnCommand(HWND hwnd, int id, HWND hwnd_ctrl, UINT code_notify) {
                 cal_stop.min, cal_stop.sec,
                 (data->tz_in == TZ_UT) ? L"UT" : L"JST");
 
-       // The current dialog values are acquired.
-       const int tab_num = TabCtrl_GetCurSel(handle.event_tab);
-       for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
-         GetEventDialog(handle.event_dialog, &event_data[tab_num], span_id);
-       }
+        // The current dialog values are acquired.
+        const int tab_num = TabCtrl_GetCurSel(handle.event_tab);
+        for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
+          GetEventDialog(handle.event_dialog, &event_data[tab_num], span_id);
+        }
 
         // For each event spans, start and stop times are set.
+        data->event_is_set  = true;
         double jd_event = 0.0;
         for (int event_id = 0; event_id < static_cast<int>(data->events.size());
             ++event_id) {
-          data->jd_event_from.push_back(std::vector<double>());
-          data->jd_event_to.push_back(std::vector<double>());
+          // The used event time span is counted, skip if 0.
+          int check_cnt = 0;
           for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
-            if (event_data[event_id].use_span[span_id] == TRUE) {
-              // The event start time is set.
-              jd_event = sat::ToJulianDay(event_data[event_id].cal[span_id]);
-              if (data->tz_in == TZ_UT) {
-                data->jd_event_from[event_id].push_back(jd_event);
-              } else {
-                data->jd_event_from[event_id].push_back(
-                    SATPASS_JST_TO_UT(jd_event));
+            if (Button_GetCheck(GetDlgItem(handle.event_dialog,
+                    control_id.check_use_span[span_id])) == BST_CHECKED) {
+              ++check_cnt;
+            }
+          }
+          if (check_cnt != 0) {
+            // The event schedule is set.
+            data->jd_event_from.push_back(std::vector<double>());
+            data->jd_event_to.push_back(std::vector<double>());
+            for (int span_id = 0; span_id < SPAN_NUM; ++span_id) {
+              if (event_data[event_id].use_span[span_id] == TRUE) {
+                // The event start time is set.
+                jd_event = sat::ToJulianDay(event_data[event_id].cal[span_id]);
+                if (data->tz_in == TZ_UT) {
+                  data->jd_event_from[event_id].push_back(jd_event);
+                } else {
+                  data->jd_event_from[event_id].push_back(
+                      SATPASS_JST_TO_UT(jd_event));
+                }
+                // The event stop time is set.
+                data->jd_event_to[event_id].push_back(
+                    data->jd_event_from[event_id].back() +
+                    event_data[event_id].len[span_id] / 1440.0);
               }
-              // The event stop time is set.
-              data->jd_event_to[event_id].push_back(
-                  data->jd_event_from[event_id].back() +
-                  event_data[event_id].len[span_id] / 1440.0);
             }
           }
         }
@@ -657,3 +672,5 @@ INT_PTR CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
       return FALSE;
   }
 }
+
+#endif
