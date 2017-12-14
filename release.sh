@@ -10,7 +10,7 @@ if [ "$1" = "" ]; then
 fi
 
 # Required: The latest version.
-VERSION='v3.0.1'
+VERSION='git describe --abbrev=0'
 
 # Output directory is created
 OUTDIR="release"
