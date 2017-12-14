@@ -3,7 +3,7 @@
 # Copyright 2017 Mamoru kaminaga
 TARGET = satpass.out
 SRC = export.cc file.cc input.cc main.cc output.cc solution.cc
-OBJDIR = build
+OBJDIR = build/ubuntu
 OBJS = $(addprefix $(OBJDIR)/, $(notdir $(SRC:.cc=.o)))
 
 GCC = g++

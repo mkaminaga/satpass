@@ -3,7 +3,7 @@
 # Copyright 2017 Mamoru kaminaga
 CC = C:\"Program Files (x86)"\"Microsoft Visual Studio\2017"\Community\VC\Tools\MSVC\14.10.25017\bin\HostX86\x86\cl.exe
 LINK = C:\"Program Files (x86)"\"Microsoft Visual Studio\2017"\Community\VC\Tools\MSVC\14.10.25017\bin\HostX86\x86\link.exe
-OBJDIR = build_windows
+OBJDIR = build\\windows
 TARGET = satpass.exe
 PDB = satpass.pdb
 MAP = satpass.map
