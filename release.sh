@@ -10,7 +10,7 @@ if [ "$1" = "" ]; then
 fi
 
 # Required: The latest version.
-VERSION='git describe --abbrev=0'
+VERSION=$(git describe --abbrev=0)
 
 # Output directory is created
 OUTDIR="release"
@@ -23,7 +23,7 @@ if [ "$1" = "1" ]; then
   if [ $? != 0 ]; then exit 1; fi
 
   # Output sub directory is created
-  TARGET="${OUTDIR}/release_${VERSION}_ubuntu"
+  TARGET="${OUTDIR}/${VERSION}_ubuntu"
 elif [ "$1" = "2" ]; then
   # Build test for Windows (Console).
   touch *.cc
@@ -36,7 +36,7 @@ elif [ "$1" = "2" ]; then
   if [ $? != 0 ]; then exit 1; fi
 
   # Output sub directory is created
-  TARGET="${OUTDIR}/release_${VERSION}_windows"
+  TARGET="${OUTDIR}/${VERSION}_windows"
 fi
 
 rm -r ${TARGET}
