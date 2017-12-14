@@ -1,0 +1,17 @@
+﻿*           text=auto
+*.txt       text
+*.vcproj    text eol=crlf
+*.sh        text eol=lf
+*.md        text eol=lf
+
+# Sound files
+*.wav       -text
+*.mp3       -text
+*.midi      -text
+*.mid       -text
+
+# Image files
+*.png       -text
+*.jpg       -text
+*.gif       -text
+*.bmp       -text
