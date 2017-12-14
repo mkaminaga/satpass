@@ -10,7 +10,7 @@ if [ "$1" = "" ]; then
 fi
 
 # Required: The latest version.
-VERSION=$(git describe --abbrev=0)
+VERSION=$(git describe --tags)
 
 # Output directory is created
 OUTDIR="release"
